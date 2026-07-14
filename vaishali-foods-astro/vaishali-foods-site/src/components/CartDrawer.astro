@@ -28,7 +28,29 @@ function open(){drawer.classList.add('open');backdrop.classList.add('open')}
 function close(){drawer.classList.remove('open');backdrop.classList.remove('open')}
 document.getElementById('open-cart').addEventListener('click',e=>{e.preventDefault();open()});
 document.getElementById('close-cart').addEventListener('click',close);backdrop.addEventListener('click',close);
-document.querySelectorAll('.add-to-cart').forEach(btn=>btn.addEventListener('click',()=>{const p=JSON.parse(btn.dataset.product);const found=cart.find(i=>i.id===p.id);found?found.qty++:cart.push({...p,qty:1});save();open()}));
+document.querySelectorAll('.add-to-cart').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const product = JSON.parse(btn.dataset.product);
+
+    const existingItem = cart.find(
+      (item) =>
+        item.id === product.id &&
+        item.weight === product.weight
+    );
+
+    if (existingItem) {
+      existingItem.qty += 1;
+    } else {
+      cart.push({
+        ...product,
+        qty: 1
+      });
+    }
+
+    save();
+    open();
+  });
+});
 items.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;const idx=Number(b.dataset.index);if(b.dataset.action==='plus')cart[idx].qty++;else cart[idx].qty--;if(cart[idx].qty<=0)cart.splice(idx,1);save()});
 document.getElementById('checkout-btn').addEventListener('click',()=>{if(!cart.length)return alert('Your cart is empty.');alert('Storefront is ready. Next we will connect the secure Razorpay + Shiprocket checkout backend.');});
 render();

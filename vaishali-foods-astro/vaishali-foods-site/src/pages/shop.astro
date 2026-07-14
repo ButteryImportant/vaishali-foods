@@ -1,0 +1,150 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { products } from '../data/products.js';
+
+const categories = ['All', 'Sweets', 'Namkeen', 'Combos'];
+---
+
+<BaseLayout
+  title="Shop | Vaishali Foods"
+  description="Shop freshly prepared traditional sweets, laddoos and savoury snacks from Vaishali Foods."
+>
+  <section class="shop-hero">
+    <div class="container shop-hero-grid">
+      <div class="shop-hero-copy">
+        <span class="eyebrow">Our collection</span>
+
+        <h1>Traditional flavours, made fresh for every order.</h1>
+
+        <p>
+          Discover handcrafted laddoos, savoury snacks and festive favourites
+          prepared with carefully selected ingredients and packed with care.
+        </p>
+
+        <div class="shop-hero-actions">
+          <a class="btn btn-primary" href="#products">Shop now</a>
+          <a class="btn btn-secondary" href="/contact">Bulk orders</a>
+        </div>
+
+        <div class="shop-points">
+          <span>Made on demand</span>
+          <span>No preservatives</span>
+          <span>Delivered across India</span>
+        </div>
+      </div>
+
+      <div class="shop-hero-visual">
+        <div class="shop-visual-card shop-visual-main">
+          <span>Freshly made</span>
+          <strong>Traditional Indian favourites</strong>
+        </div>
+
+        <div class="shop-visual-card shop-visual-small">
+          <span>Premium ingredients</span>
+        </div>
+
+        <div class="shop-visual-seal">
+          <span>Pure Tradition</span>
+          <strong>Fresh Taste</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shop-intro">
+    <div class="container shop-intro-grid">
+      <div>
+        <span class="eyebrow">Explore Vaishali Foods</span>
+        <h2>Something for every craving</h2>
+      </div>
+
+      <p>
+        Choose your preferred pack size, add products to your cart and place
+        your order in just a few simple steps.
+      </p>
+    </div>
+  </section>
+
+  <section class="section shop-products" id="products">
+    <div class="container">
+      <div class="shop-toolbar">
+        <div class="category-tabs" aria-label="Product categories">
+          {
+            categories.map((category, index) => (
+              <button
+                type="button"
+                class:list={[
+                  'category-tab',
+                  { active: index === 0 }
+                ]}
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))
+          }
+        </div>
+
+        <span class="product-count">{products.length} products</span>
+      </div>
+
+      <div class="product-grid shop-product-grid">
+  {
+    products.map((product) => (
+      <div
+        class="shop-product-item"
+        data-category={product.category}
+      >
+        <ProductCard product={product} />
+      </div>
+    ))
+  }
+</div>
+    </div>
+  </section>
+
+  <section class="shop-promise">
+    <div class="container">
+      <div class="shop-promise-card">
+        <div>
+          <span class="eyebrow">The Vaishali Foods promise</span>
+          <h2>Fresh food. Honest ingredients. Traditional taste.</h2>
+        </div>
+
+        <a class="btn btn-primary" href="/about">Our story</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script is:inline>
+  const tabs = document.querySelectorAll('.category-tab');
+  const items = document.querySelectorAll('.shop-product-item');
+  const count = document.querySelector('.product-count');
+
+  tabs.forEach((tab) => {
+    tab.addEventListener('click', () => {
+      tabs.forEach((item) => item.classList.remove('active'));
+      tab.classList.add('active');
+
+      const selected = tab.dataset.category;
+      let visibleCount = 0;
+
+      items.forEach((item) => {
+        const shouldShow =
+          selected === 'All' || item.dataset.category === selected;
+
+        item.hidden = !shouldShow;
+
+        if (shouldShow) {
+          visibleCount += 1;
+        }
+      });
+
+      count.textContent = `${visibleCount} ${
+        visibleCount === 1 ? 'product' : 'products'
+      }`;
+    });
+  });
+</script>
