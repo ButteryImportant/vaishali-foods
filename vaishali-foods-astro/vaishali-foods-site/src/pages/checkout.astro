@@ -158,6 +158,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               <input
                 type="text"
                 name="pincode"
+                id="checkout-pincode"
                 autocomplete="postal-code"
                 inputmode="numeric"
                 maxlength="6"
@@ -165,6 +166,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 placeholder="6-digit PIN code"
                 required
               />
+
+              <small id="shipping-status"></small>
             </label>
 
             <label>
@@ -215,6 +218,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           class="btn btn-primary checkout-mobile-button"
           type="submit"
           id="mobile-payment-button"
+          disabled
         >
           Continue to payment
         </button>
@@ -239,11 +243,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <a class="btn btn-secondary" href="/shop">Browse products</a>
           </div>
 
-          <div
-            class="free-shipping-message"
-            id="free-shipping-message"
-          ></div>
-
           <div class="checkout-totals" id="checkout-totals">
             <div>
               <span>Subtotal</span>
@@ -252,7 +251,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             <div>
               <span>Shipping</span>
-              <strong id="checkout-shipping">₹69</strong>
+              <strong id="checkout-shipping">Enter PIN</strong>
             </div>
 
             <div class="checkout-total-row">
@@ -274,12 +273,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             type="submit"
             form="checkout-form"
             id="desktop-payment-button"
+            disabled
           >
             Continue to payment
           </button>
 
           <p class="checkout-button-note">
-            Free shipping on orders of ₹999 or more.
+            Delivery charges are calculated using your PIN code.
           </p>
         </div>
       </aside>
@@ -294,8 +294,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <script is:inline>
   const CART_KEY = 'vf-cart';
-  const FREE_SHIPPING_THRESHOLD = 999;
-  const STANDARD_SHIPPING_FEE = 69;
 
   const currency = new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -309,14 +307,17 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const subtotalElement = document.querySelector('#checkout-subtotal');
   const shippingElement = document.querySelector('#checkout-shipping');
   const totalElement = document.querySelector('#checkout-total');
-  const freeShippingMessage = document.querySelector(
-    '#free-shipping-message'
-  );
+  const pincodeInput = document.querySelector('#checkout-pincode');
+  const shippingStatus = document.querySelector('#shipping-status');
   const form = document.querySelector('#checkout-form');
 
   const paymentButtons = document.querySelectorAll(
     '#desktop-payment-button, #mobile-payment-button'
   );
+
+  let verifiedShipping = null;
+  let shippingRequestId = 0;
+  let pincodeTimer;
 
   function getCart() {
     try {
@@ -348,10 +349,131 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     }, 0);
   }
 
-  function calculateShipping(subtotal) {
-    return subtotal >= FREE_SHIPPING_THRESHOLD
-      ? 0
-      : STANDARD_SHIPPING_FEE;
+  function setPaymentButtonsDisabled(disabled) {
+    paymentButtons.forEach((button) => {
+      button.disabled = disabled;
+    });
+  }
+
+  function renderCartTotals() {
+    const cart = getCart();
+    const subtotal = calculateSubtotal(cart);
+    const shipping = verifiedShipping?.amount ?? 0;
+
+    subtotalElement.textContent = currency.format(subtotal);
+    totalElement.textContent = currency.format(
+      subtotal + shipping
+    );
+
+    if (verifiedShipping) {
+      shippingElement.textContent = currency.format(
+        verifiedShipping.amount
+      );
+    } else if ((pincodeInput?.value || '').length !== 6) {
+      shippingElement.textContent = 'Enter PIN';
+    }
+  }
+
+  async function calculateLiveShipping() {
+    const cart = getCart();
+    const pincode = pincodeInput?.value.trim() || '';
+
+    verifiedShipping = null;
+    renderCartTotals();
+
+    if (!/^[1-9][0-9]{5}$/.test(pincode)) {
+      shippingElement.textContent = 'Enter PIN';
+      shippingStatus.textContent =
+        'Enter a valid 6-digit PIN code.';
+      setPaymentButtonsDisabled(true);
+      return;
+    }
+
+    if (cart.length === 0) {
+      return;
+    }
+
+    const currentRequestId = ++shippingRequestId;
+
+    shippingElement.textContent = 'Calculating…';
+    shippingStatus.textContent =
+      'Checking available delivery partners…';
+
+    setPaymentButtonsDisabled(true);
+
+    try {
+      const response = await fetch('/api/shipping-rate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          pincode,
+          cart: cart.map((item) => ({
+            id: item.id,
+            weight: item.weight,
+            qty: Number(item.qty || 1)
+          }))
+        })
+      });
+
+      const responseText = await response.text();
+
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `Shipping server returned an invalid response (${response.status}).`
+        );
+      }
+
+      if (currentRequestId !== shippingRequestId) {
+        return;
+      }
+
+      if (!response.ok || !data.success) {
+        throw new Error(
+          data.error ||
+            'Unable to calculate delivery charges.'
+        );
+      }
+
+      verifiedShipping = {
+        amount: Number(data.shipping),
+        pincode,
+        courier: data.courier,
+        packedWeight: data.packedWeight
+      };
+
+      renderCartTotals();
+
+      const courierName =
+        verifiedShipping.courier?.name ||
+        'Delivery partner';
+
+      const estimate =
+        verifiedShipping.courier?.etd ||
+        verifiedShipping.courier?.estimatedDeliveryDays;
+
+      shippingStatus.textContent = estimate
+        ? `${courierName} · Estimated delivery: ${estimate}`
+        : `${courierName} selected`;
+
+      setPaymentButtonsDisabled(false);
+    } catch (error) {
+      console.error(error);
+
+      verifiedShipping = null;
+      shippingElement.textContent = 'Unavailable';
+      shippingStatus.textContent =
+        error.message ||
+        'Delivery is unavailable for this PIN code.';
+
+      renderCartTotals();
+      setPaymentButtonsDisabled(true);
+    }
   }
 
   function updateQuantity(itemKey, change) {
@@ -370,7 +492,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     );
 
     saveCart(updatedCart);
+
+    verifiedShipping = null;
+    shippingElement.textContent = 'Recalculating…';
+    setPaymentButtonsDisabled(true);
+
     renderCart();
+
+    if (pincodeInput?.value.length === 6) {
+      calculateLiveShipping();
+    }
   }
 
   function removeItem(itemKey) {
@@ -379,7 +510,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     );
 
     saveCart(cart);
+
+    verifiedShipping = null;
+    shippingElement.textContent = 'Recalculating…';
+    setPaymentButtonsDisabled(true);
+
     renderCart();
+
+    if (
+      cart.length > 0 &&
+      pincodeInput?.value.length === 6
+    ) {
+      calculateLiveShipping();
+    }
   }
 
   function renderCart() {
@@ -390,29 +533,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (cart.length === 0) {
       emptyState.hidden = false;
       totalsSection.hidden = true;
-
-      if (freeShippingMessage) {
-        freeShippingMessage.innerHTML = '';
-      }
-
-      paymentButtons.forEach((button) => {
-        button.disabled = true;
-      });
-
+      shippingStatus.textContent = '';
+      setPaymentButtonsDisabled(true);
       return;
     }
 
     emptyState.hidden = true;
     totalsSection.hidden = false;
 
-    paymentButtons.forEach((button) => {
-      button.disabled = false;
-    });
-
     cart.forEach((item) => {
       const itemKey = getItemKey(item);
       const quantity = Number(item.qty || 1);
-      const itemTotal = Number(item.price || 0) * quantity;
+      const itemTotal =
+        Number(item.price || 0) * quantity;
 
       const element = document.createElement('article');
       element.className = 'checkout-item';
@@ -485,48 +618,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       itemsContainer.appendChild(element);
     });
 
-    const subtotal = calculateSubtotal(cart);
-    const shipping = calculateShipping(subtotal);
-    const grandTotal = subtotal + shipping;
+    renderCartTotals();
 
-    subtotalElement.textContent = currency.format(subtotal);
-
-    shippingElement.textContent =
-      shipping === 0
-        ? 'FREE'
-        : currency.format(shipping);
-
-    totalElement.textContent = currency.format(grandTotal);
-
-    if (freeShippingMessage) {
-      if (shipping === 0) {
-        freeShippingMessage.innerHTML = `
-          <strong>Free shipping unlocked!</strong>
-          <span>
-            You saved ${currency.format(
-              STANDARD_SHIPPING_FEE
-            )} on delivery.
-          </span>
-        `;
-      } else {
-        const remaining =
-          FREE_SHIPPING_THRESHOLD - subtotal;
-
-        freeShippingMessage.innerHTML = `
-          <strong>
-            Add ${currency.format(
-              remaining
-            )} more for free shipping
-          </strong>
-
-          <span>
-            Free delivery on orders of
-            ${currency.format(
-              FREE_SHIPPING_THRESHOLD
-            )} or more.
-          </span>
-        `;
-      }
+    if (!verifiedShipping) {
+      setPaymentButtonsDisabled(true);
     }
   }
 
@@ -544,6 +639,32 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     alert(message);
   }
 
+  pincodeInput?.addEventListener('input', () => {
+    pincodeInput.value = pincodeInput.value
+      .replace(/\D/g, '')
+      .slice(0, 6);
+
+    clearTimeout(pincodeTimer);
+    shippingRequestId += 1;
+    verifiedShipping = null;
+
+    renderCartTotals();
+    setPaymentButtonsDisabled(true);
+
+    if (pincodeInput.value.length === 6) {
+      shippingElement.textContent = 'Waiting…';
+      shippingStatus.textContent =
+        'Preparing delivery calculation…';
+
+      pincodeTimer = setTimeout(() => {
+        calculateLiveShipping();
+      }, 400);
+    } else {
+      shippingElement.textContent = 'Enter PIN';
+      shippingStatus.textContent = '';
+    }
+  });
+
   form?.addEventListener('submit', async (event) => {
     event.preventDefault();
 
@@ -559,16 +680,28 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       return;
     }
 
+    const customer = Object.fromEntries(
+      new FormData(form).entries()
+    );
+
+    if (
+      !verifiedShipping ||
+      verifiedShipping.pincode !== customer.pincode
+    ) {
+      showCheckoutError(
+        'Please enter your PIN code and wait for delivery charges to be calculated.'
+      );
+
+      await calculateLiveShipping();
+      return;
+    }
+
     if (typeof window.Razorpay !== 'function') {
       showCheckoutError(
         'The payment window could not load. Check your connection and try again.'
       );
       return;
     }
-
-    const customer = Object.fromEntries(
-      new FormData(form).entries()
-    );
 
     sessionStorage.setItem(
       'vf-checkout-details',
@@ -584,6 +717,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
+          pincode: customer.pincode,
           cart: cart.map((item) => ({
             id: item.id,
             weight: item.weight,
@@ -645,6 +779,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         modal: {
           ondismiss() {
             setPaymentButtonsLoading(false);
+            setPaymentButtonsDisabled(false);
           }
         },
 
@@ -692,7 +827,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 paymentId: verification.payment_id,
                 orderId: verification.order_id,
                 customer,
-                cart
+                cart,
+                shipping: verifiedShipping
               })
             );
 
@@ -722,6 +858,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         );
 
         setPaymentButtonsLoading(false);
+        setPaymentButtonsDisabled(false);
 
         showCheckoutError(
           response.error?.description ||
@@ -732,7 +869,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       razorpay.open();
     } catch (error) {
       console.error(error);
+
       setPaymentButtonsLoading(false);
+      setPaymentButtonsDisabled(false);
 
       showCheckoutError(
         error.message ||
