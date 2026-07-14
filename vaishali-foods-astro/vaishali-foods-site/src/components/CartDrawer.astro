@@ -1,0 +1,35 @@
+<div class="drawer-backdrop" id="drawer-backdrop"></div>
+<aside class="drawer" id="cart-drawer" aria-label="Shopping cart">
+  <div class="drawer-head"><div><span class="eyebrow">Your order</span><h3>Shopping cart</h3></div><button class="icon-btn" id="close-cart" aria-label="Close cart">×</button></div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="drawer-foot">
+    <div class="total-row"><span>Subtotal</span><span id="cart-total">₹0</span></div>
+    <button class="btn btn-primary" style="width:100%" id="checkout-btn">Proceed to checkout</button>
+    <small style="display:block;margin-top:10px;color:var(--brown-soft)">Razorpay checkout will be connected after your account keys are added securely.</small>
+  </div>
+</aside>
+<script is:inline>
+const PRODUCTS_KEY='vf-cart';
+let cart=JSON.parse(localStorage.getItem(PRODUCTS_KEY)||'[]');
+const drawer=document.getElementById('cart-drawer');
+const backdrop=document.getElementById('drawer-backdrop');
+const count=document.getElementById('cart-count');
+const items=document.getElementById('cart-items');
+const total=document.getElementById('cart-total');
+function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(v)}
+function save(){localStorage.setItem(PRODUCTS_KEY,JSON.stringify(cart));render()}
+function render(){
+  count.textContent=cart.reduce((s,i)=>s+i.qty,0);
+  total.textContent=money(cart.reduce((s,i)=>s+i.price*i.qty,0));
+  if(!cart.length){items.innerHTML='<div class="empty">Your cart is empty.<br>Add something delicious.</div>';return}
+  items.innerHTML=cart.map((i,index)=>`<div class="cart-item"><div><strong>${i.name}</strong><small>${i.weight} · ${money(i.price)}</small><div class="qty-controls"><button data-action="minus" data-index="${index}">−</button><span>${i.qty}</span><button data-action="plus" data-index="${index}">+</button></div></div><strong>${money(i.price*i.qty)}</strong></div>`).join('');
+}
+function open(){drawer.classList.add('open');backdrop.classList.add('open')}
+function close(){drawer.classList.remove('open');backdrop.classList.remove('open')}
+document.getElementById('open-cart').addEventListener('click',e=>{e.preventDefault();open()});
+document.getElementById('close-cart').addEventListener('click',close);backdrop.addEventListener('click',close);
+document.querySelectorAll('.add-to-cart').forEach(btn=>btn.addEventListener('click',()=>{const p=JSON.parse(btn.dataset.product);const found=cart.find(i=>i.id===p.id);found?found.qty++:cart.push({...p,qty:1});save();open()}));
+items.addEventListener('click',e=>{const b=e.target.closest('button[data-action]');if(!b)return;const idx=Number(b.dataset.index);if(b.dataset.action==='plus')cart[idx].qty++;else cart[idx].qty--;if(cart[idx].qty<=0)cart.splice(idx,1);save()});
+document.getElementById('checkout-btn').addEventListener('click',()=>{if(!cart.length)return alert('Your cart is empty.');alert('Storefront is ready. Next we will connect the secure Razorpay + Shiprocket checkout backend.');});
+render();
+</script>

@@ -1,0 +1,14 @@
+---
+const { product } = Astro.props;
+---
+<article class="card">
+  <div class="placeholder" aria-label={`Placeholder image for ${product.name}`}></div>
+  <div class="card-body">
+    <div class="card-top"><h3>{product.name}</h3><span class="price">₹{product.price}</span></div>
+    <p class="meta">{product.weight} · {product.note}</p>
+    <div class="card-actions">
+      <span class="qty-note">Made fresh on demand</span>
+      <button class="btn btn-primary add-to-cart" data-product={JSON.stringify(product)}>Add</button>
+    </div>
+  </div>
+</article>
