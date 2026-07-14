@@ -282,6 +282,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 </BaseLayout>
 
+<script
+  is:inline
+  src="https://checkout.razorpay.com/v1/checkout.js"
+></script>
+
 <script is:inline>
   const CART_KEY = 'vf-cart';
 
@@ -447,32 +452,184 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     totalElement.textContent = currency.format(subtotal);
   }
 
-  form?.addEventListener('submit', (event) => {
-    event.preventDefault();
+  function setPaymentButtonsLoading(isLoading) {
+  paymentButtons.forEach((button) => {
+    button.disabled = isLoading;
 
-    const cart = getCart();
-
-    if (cart.length === 0) {
-      window.location.href = '/shop';
-      return;
-    }
-
-    if (!form.checkValidity()) {
-      form.reportValidity();
-      return;
-    }
-
-    const formData = Object.fromEntries(new FormData(form).entries());
-
-    sessionStorage.setItem(
-      'vf-checkout-details',
-      JSON.stringify(formData)
-    );
-
-    alert(
-      'Checkout form is working. Razorpay payment will be connected next.'
-    );
+    button.textContent = isLoading
+      ? 'Preparing payment...'
+      : 'Continue to payment';
   });
+}
 
+function showCheckoutError(message) {
+  alert(message);
+}
+
+form?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const cart = getCart();
+
+  if (cart.length === 0) {
+    window.location.href = '/shop';
+    return;
+  }
+
+  if (!form.checkValidity()) {
+    form.reportValidity();
+    return;
+  }
+
+  if (typeof window.Razorpay !== 'function') {
+    showCheckoutError(
+      'The payment window could not load. Check your connection and try again.'
+    );
+    return;
+  }
+
+  const customer = Object.fromEntries(
+    new FormData(form).entries()
+  );
+
+  sessionStorage.setItem(
+    'vf-checkout-details',
+    JSON.stringify(customer)
+  );
+
+  setPaymentButtonsLoading(true);
+
+  try {
+    const orderResponse = await fetch('/api/create-order', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        cart: cart.map((item) => ({
+          id: item.id,
+          weight: item.weight,
+          qty: Number(item.qty || 1)
+        }))
+      })
+    });
+
+    const order = await orderResponse.json();
+
+    if (!orderResponse.ok) {
+      throw new Error(
+        order.error || 'Unable to create your payment order.'
+      );
+    }
+
+    const razorpay = new window.Razorpay({
+      key: order.key_id,
+      amount: order.amount,
+      currency: order.currency,
+      name: 'Vaishali Foods',
+      description: 'Pure Tradition, Fresh Taste',
+      image: '/images/logo.png',
+      order_id: order.order_id,
+
+      prefill: {
+        name: customer.name,
+        email: customer.email,
+        contact: customer.phone
+      },
+
+      notes: {
+        address: [
+          customer.addressLine1,
+          customer.addressLine2,
+          customer.city,
+          customer.state,
+          customer.pincode
+        ]
+          .filter(Boolean)
+          .join(', ')
+      },
+
+      theme: {
+        color: '#5b3923'
+      },
+
+      modal: {
+        ondismiss() {
+          setPaymentButtonsLoading(false);
+        }
+      },
+
+      async handler(paymentResponse) {
+        try {
+          const verificationResponse = await fetch(
+            '/api/verify-payment',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(paymentResponse)
+            }
+          );
+
+          const verification = await verificationResponse.json();
+
+          if (!verificationResponse.ok || !verification.success) {
+            throw new Error(
+              verification.error ||
+                'Payment verification failed.'
+            );
+          }
+
+          sessionStorage.setItem(
+            'vf-payment-result',
+            JSON.stringify({
+              paymentId: verification.payment_id,
+              orderId: verification.order_id,
+              customer,
+              cart
+            })
+          );
+
+          localStorage.removeItem(CART_KEY);
+
+          alert(
+            `Payment successful! Payment ID: ${verification.payment_id}`
+          );
+
+          window.location.href = '/';
+        } catch (error) {
+          console.error(error);
+
+          showCheckoutError(
+            'Payment was received but verification could not be completed. Please contact Vaishali Foods before paying again.'
+          );
+        } finally {
+          setPaymentButtonsLoading(false);
+        }
+      }
+    });
+
+    razorpay.on('payment.failed', (response) => {
+      console.error('Payment failed:', response.error);
+
+      setPaymentButtonsLoading(false);
+
+      showCheckoutError(
+        response.error?.description ||
+          'Payment failed. No order has been confirmed.'
+      );
+    });
+
+    razorpay.open();
+  } catch (error) {
+    console.error(error);
+    setPaymentButtonsLoading(false);
+
+    showCheckoutError(
+      error.message || 'Unable to start payment. Please try again.'
+    );
+  }
+});
   renderCart();
 </script>
