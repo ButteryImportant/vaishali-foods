@@ -28,6 +28,9 @@ const PRODUCT_PRICES = {
   }
 };
 
+const FREE_SHIPPING_THRESHOLD = 999;
+const STANDARD_SHIPPING_FEE = 69;
+
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
     status,
@@ -55,7 +58,9 @@ function calculateSubtotal(cart) {
       quantity < 1 ||
       quantity > 20
     ) {
-      throw new Error('The cart contains an invalid product or quantity.');
+      throw new Error(
+        'The cart contains an invalid product or quantity.'
+      );
     }
 
     return total + unitPrice * quantity;
@@ -67,7 +72,10 @@ export async function onRequestPost(context) {
 
   if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
     return json(
-      { error: 'Razorpay has not been configured on the server.' },
+      {
+        error:
+          'Razorpay has not been configured on the server.'
+      },
       500
     );
   }
@@ -88,14 +96,25 @@ export async function onRequestPost(context) {
     return json({ error: error.message }, 400);
   }
 
+  const shipping =
+    subtotal >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : STANDARD_SHIPPING_FEE;
+
+  const total = subtotal + shipping;
+
   // Razorpay expects the amount in paise.
-  const amount = Math.round(subtotal * 100);
+  const amount = Math.round(total * 100);
 
   if (amount < 100) {
-    return json({ error: 'Order amount must be at least ₹1.' }, 400);
+    return json(
+      { error: 'Order amount must be at least ₹1.' },
+      400
+    );
   }
 
-  const receipt = `vf_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
+  const receipt =
+    `vf_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 
   const credentials = btoa(
     `${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`
@@ -115,7 +134,9 @@ export async function onRequestPost(context) {
           currency: 'INR',
           receipt,
           notes: {
-            store: 'Vaishali Foods'
+            store: 'Vaishali Foods',
+            subtotal: String(subtotal),
+            shipping: String(shipping)
           }
         })
       }
@@ -124,9 +145,13 @@ export async function onRequestPost(context) {
     const razorpayData = await razorpayResponse.json();
 
     if (!razorpayResponse.ok) {
-      console.error('Razorpay order error:', razorpayData);
+      console.error(
+        'Razorpay order error:',
+        razorpayData
+      );
 
-      const status = razorpayResponse.status === 401 ? 401 : 500;
+      const status =
+        razorpayResponse.status === 401 ? 401 : 500;
 
       return json(
         {
@@ -143,13 +168,22 @@ export async function onRequestPost(context) {
       order_id: razorpayData.id,
       amount: razorpayData.amount,
       currency: razorpayData.currency,
-      key_id: env.RAZORPAY_KEY_ID
+      key_id: env.RAZORPAY_KEY_ID,
+      subtotal,
+      shipping,
+      total
     });
   } catch (error) {
-    console.error('Create-order exception:', error);
+    console.error(
+      'Create-order exception:',
+      error
+    );
 
     return json(
-      { error: 'Unable to connect to the payment service.' },
+      {
+        error:
+          'Unable to connect to the payment service.'
+      },
       500
     );
   }

@@ -239,6 +239,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             <a class="btn btn-secondary" href="/shop">Browse products</a>
           </div>
 
+          <div
+            class="free-shipping-message"
+            id="free-shipping-message"
+          ></div>
+
           <div class="checkout-totals" id="checkout-totals">
             <div>
               <span>Subtotal</span>
@@ -247,7 +252,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             <div>
               <span>Shipping</span>
-              <strong id="checkout-shipping">Calculated later</strong>
+              <strong id="checkout-shipping">₹69</strong>
             </div>
 
             <div class="checkout-total-row">
@@ -259,8 +264,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="checkout-payment-note">
             <span>Secure payment</span>
             <p>
-              Razorpay will be connected next. Your card or UPI details will
-              never be stored on this website.
+              Payment is processed securely through Razorpay. Your card or UPI
+              details are never stored on this website.
             </p>
           </div>
 
@@ -274,7 +279,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </button>
 
           <p class="checkout-button-note">
-            Shipping will be calculated after Shiprocket integration.
+            Free shipping on orders of ₹999 or more.
           </p>
         </div>
       </aside>
@@ -289,6 +294,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <script is:inline>
   const CART_KEY = 'vf-cart';
+  const FREE_SHIPPING_THRESHOLD = 999;
+  const STANDARD_SHIPPING_FEE = 69;
 
   const currency = new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -300,15 +307,23 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   const emptyState = document.querySelector('#checkout-empty');
   const totalsSection = document.querySelector('#checkout-totals');
   const subtotalElement = document.querySelector('#checkout-subtotal');
+  const shippingElement = document.querySelector('#checkout-shipping');
   const totalElement = document.querySelector('#checkout-total');
+  const freeShippingMessage = document.querySelector(
+    '#free-shipping-message'
+  );
   const form = document.querySelector('#checkout-form');
+
   const paymentButtons = document.querySelectorAll(
     '#desktop-payment-button, #mobile-payment-button'
   );
 
   function getCart() {
     try {
-      const storedCart = JSON.parse(localStorage.getItem(CART_KEY) || '[]');
+      const storedCart = JSON.parse(
+        localStorage.getItem(CART_KEY) || '[]'
+      );
+
       return Array.isArray(storedCart) ? storedCart : [];
     } catch {
       return [];
@@ -325,20 +340,34 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
   function calculateSubtotal(cart) {
     return cart.reduce((total, item) => {
-      return total + Number(item.price || 0) * Number(item.qty || 1);
+      return (
+        total +
+        Number(item.price || 0) *
+          Number(item.qty || 1)
+      );
     }, 0);
+  }
+
+  function calculateShipping(subtotal) {
+    return subtotal >= FREE_SHIPPING_THRESHOLD
+      ? 0
+      : STANDARD_SHIPPING_FEE;
   }
 
   function updateQuantity(itemKey, change) {
     const cart = getCart();
 
-    const item = cart.find((product) => getItemKey(product) === itemKey);
+    const item = cart.find(
+      (product) => getItemKey(product) === itemKey
+    );
 
     if (!item) return;
 
     item.qty = Number(item.qty || 1) + change;
 
-    const updatedCart = cart.filter((product) => Number(product.qty) > 0);
+    const updatedCart = cart.filter(
+      (product) => Number(product.qty) > 0
+    );
 
     saveCart(updatedCart);
     renderCart();
@@ -361,6 +390,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     if (cart.length === 0) {
       emptyState.hidden = false;
       totalsSection.hidden = true;
+
+      if (freeShippingMessage) {
+        freeShippingMessage.innerHTML = '';
+      }
 
       paymentButtons.forEach((button) => {
         button.disabled = true;
@@ -433,203 +466,280 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       element
         .querySelector('[data-action="decrease"]')
-        .addEventListener('click', () => updateQuantity(itemKey, -1));
+        ?.addEventListener('click', () => {
+          updateQuantity(itemKey, -1);
+        });
 
       element
         .querySelector('[data-action="increase"]')
-        .addEventListener('click', () => updateQuantity(itemKey, 1));
+        ?.addEventListener('click', () => {
+          updateQuantity(itemKey, 1);
+        });
 
       element
         .querySelector('[data-action="remove"]')
-        .addEventListener('click', () => removeItem(itemKey));
+        ?.addEventListener('click', () => {
+          removeItem(itemKey);
+        });
 
       itemsContainer.appendChild(element);
     });
 
     const subtotal = calculateSubtotal(cart);
+    const shipping = calculateShipping(subtotal);
+    const grandTotal = subtotal + shipping;
 
     subtotalElement.textContent = currency.format(subtotal);
-    totalElement.textContent = currency.format(subtotal);
+
+    shippingElement.textContent =
+      shipping === 0
+        ? 'FREE'
+        : currency.format(shipping);
+
+    totalElement.textContent = currency.format(grandTotal);
+
+    if (freeShippingMessage) {
+      if (shipping === 0) {
+        freeShippingMessage.innerHTML = `
+          <strong>Free shipping unlocked!</strong>
+          <span>
+            You saved ${currency.format(
+              STANDARD_SHIPPING_FEE
+            )} on delivery.
+          </span>
+        `;
+      } else {
+        const remaining =
+          FREE_SHIPPING_THRESHOLD - subtotal;
+
+        freeShippingMessage.innerHTML = `
+          <strong>
+            Add ${currency.format(
+              remaining
+            )} more for free shipping
+          </strong>
+
+          <span>
+            Free delivery on orders of
+            ${currency.format(
+              FREE_SHIPPING_THRESHOLD
+            )} or more.
+          </span>
+        `;
+      }
+    }
   }
 
   function setPaymentButtonsLoading(isLoading) {
-  paymentButtons.forEach((button) => {
-    button.disabled = isLoading;
+    paymentButtons.forEach((button) => {
+      button.disabled = isLoading;
 
-    button.textContent = isLoading
-      ? 'Preparing payment...'
-      : 'Continue to payment';
-  });
-}
-
-function showCheckoutError(message) {
-  alert(message);
-}
-
-form?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
-  const cart = getCart();
-
-  if (cart.length === 0) {
-    window.location.href = '/shop';
-    return;
-  }
-
-  if (!form.checkValidity()) {
-    form.reportValidity();
-    return;
-  }
-
-  if (typeof window.Razorpay !== 'function') {
-    showCheckoutError(
-      'The payment window could not load. Check your connection and try again.'
-    );
-    return;
-  }
-
-  const customer = Object.fromEntries(
-    new FormData(form).entries()
-  );
-
-  sessionStorage.setItem(
-    'vf-checkout-details',
-    JSON.stringify(customer)
-  );
-
-  setPaymentButtonsLoading(true);
-
-  try {
-    const orderResponse = await fetch('/api/create-order', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        cart: cart.map((item) => ({
-          id: item.id,
-          weight: item.weight,
-          qty: Number(item.qty || 1)
-        }))
-      })
+      button.textContent = isLoading
+        ? 'Preparing payment...'
+        : 'Continue to payment';
     });
+  }
 
-    const order = await orderResponse.json();
+  function showCheckoutError(message) {
+    alert(message);
+  }
 
-    if (!orderResponse.ok) {
-      throw new Error(
-        order.error || 'Unable to create your payment order.'
-      );
+  form?.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const cart = getCart();
+
+    if (cart.length === 0) {
+      window.location.href = '/shop';
+      return;
     }
 
-    const razorpay = new window.Razorpay({
-      key: order.key_id,
-      amount: order.amount,
-      currency: order.currency,
-      name: 'Vaishali Foods',
-      description: 'Pure Tradition, Fresh Taste',
-      image: '/images/logo.png',
-      order_id: order.order_id,
+    if (!form.checkValidity()) {
+      form.reportValidity();
+      return;
+    }
 
-      prefill: {
-        name: customer.name,
-        email: customer.email,
-        contact: customer.phone
-      },
+    if (typeof window.Razorpay !== 'function') {
+      showCheckoutError(
+        'The payment window could not load. Check your connection and try again.'
+      );
+      return;
+    }
 
-      notes: {
-        address: [
-          customer.addressLine1,
-          customer.addressLine2,
-          customer.city,
-          customer.state,
-          customer.pincode
-        ]
-          .filter(Boolean)
-          .join(', ')
-      },
+    const customer = Object.fromEntries(
+      new FormData(form).entries()
+    );
 
-      theme: {
-        color: '#5b3923'
-      },
+    sessionStorage.setItem(
+      'vf-checkout-details',
+      JSON.stringify(customer)
+    );
 
-      modal: {
-        ondismiss() {
-          setPaymentButtonsLoading(false);
-        }
-      },
+    setPaymentButtonsLoading(true);
 
-      async handler(paymentResponse) {
-        try {
-          const verificationResponse = await fetch(
-            '/api/verify-payment',
-            {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify(paymentResponse)
-            }
-          );
+    try {
+      const orderResponse = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          cart: cart.map((item) => ({
+            id: item.id,
+            weight: item.weight,
+            qty: Number(item.qty || 1)
+          }))
+        })
+      });
 
-          const verification = await verificationResponse.json();
+      const responseText = await orderResponse.text();
 
-          if (!verificationResponse.ok || !verification.success) {
-            throw new Error(
-              verification.error ||
-                'Payment verification failed.'
-            );
-          }
+      let order;
 
-          sessionStorage.setItem(
-            'vf-payment-result',
-            JSON.stringify({
-              paymentId: verification.payment_id,
-              orderId: verification.order_id,
-              customer,
-              cart
-            })
-          );
-
-          localStorage.removeItem(CART_KEY);
-
-          alert(
-            `Payment successful! Payment ID: ${verification.payment_id}`
-          );
-
-          window.location.href = '/';
-        } catch (error) {
-          console.error(error);
-
-          showCheckoutError(
-            'Payment was received but verification could not be completed. Please contact Vaishali Foods before paying again.'
-          );
-        } finally {
-          setPaymentButtonsLoading(false);
-        }
+      try {
+        order = JSON.parse(responseText);
+      } catch {
+        throw new Error(
+          `Payment server returned an invalid response (${orderResponse.status}).`
+        );
       }
-    });
 
-    razorpay.on('payment.failed', (response) => {
-      console.error('Payment failed:', response.error);
+      if (!orderResponse.ok) {
+        throw new Error(
+          order.error ||
+            'Unable to create your payment order.'
+        );
+      }
 
+      const razorpay = new window.Razorpay({
+        key: order.key_id,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'Vaishali Foods',
+        description: 'Pure Tradition, Fresh Taste',
+        image: '/images/logo.png',
+        order_id: order.order_id,
+
+        prefill: {
+          name: customer.name,
+          email: customer.email,
+          contact: customer.phone
+        },
+
+        notes: {
+          address: [
+            customer.addressLine1,
+            customer.addressLine2,
+            customer.city,
+            customer.state,
+            customer.pincode
+          ]
+            .filter(Boolean)
+            .join(', ')
+        },
+
+        theme: {
+          color: '#5b3923'
+        },
+
+        modal: {
+          ondismiss() {
+            setPaymentButtonsLoading(false);
+          }
+        },
+
+        async handler(paymentResponse) {
+          try {
+            const verificationResponse = await fetch(
+              '/api/verify-payment',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(paymentResponse)
+              }
+            );
+
+            const verificationText =
+              await verificationResponse.text();
+
+            let verification;
+
+            try {
+              verification = JSON.parse(
+                verificationText
+              );
+            } catch {
+              throw new Error(
+                'The payment verification server returned an invalid response.'
+              );
+            }
+
+            if (
+              !verificationResponse.ok ||
+              !verification.success
+            ) {
+              throw new Error(
+                verification.error ||
+                  'Payment verification failed.'
+              );
+            }
+
+            sessionStorage.setItem(
+              'vf-payment-result',
+              JSON.stringify({
+                paymentId: verification.payment_id,
+                orderId: verification.order_id,
+                customer,
+                cart
+              })
+            );
+
+            localStorage.removeItem(CART_KEY);
+
+            alert(
+              `Payment successful! Payment ID: ${verification.payment_id}`
+            );
+
+            window.location.href = '/';
+          } catch (error) {
+            console.error(error);
+
+            showCheckoutError(
+              'Payment was received but verification could not be completed. Please contact Vaishali Foods before paying again.'
+            );
+          } finally {
+            setPaymentButtonsLoading(false);
+          }
+        }
+      });
+
+      razorpay.on('payment.failed', (response) => {
+        console.error(
+          'Payment failed:',
+          response.error
+        );
+
+        setPaymentButtonsLoading(false);
+
+        showCheckoutError(
+          response.error?.description ||
+            'Payment failed. No order has been confirmed.'
+        );
+      });
+
+      razorpay.open();
+    } catch (error) {
+      console.error(error);
       setPaymentButtonsLoading(false);
 
       showCheckoutError(
-        response.error?.description ||
-          'Payment failed. No order has been confirmed.'
+        error.message ||
+          'Unable to start payment. Please try again.'
       );
-    });
+    }
+  });
 
-    razorpay.open();
-  } catch (error) {
-    console.error(error);
-    setPaymentButtonsLoading(false);
-
-    showCheckoutError(
-      error.message || 'Unable to start payment. Please try again.'
-    );
-  }
-});
   renderCart();
 </script>

@@ -1646,3 +1646,65 @@ h2{font-size:clamp(2rem,5vw,3.4rem)}
     aspect-ratio: 1 / 1;
   }
 }
+.free-shipping-message {
+  display: grid;
+  gap: 5px;
+  margin-top: 18px;
+  padding: 15px 17px;
+  border: 1px solid rgba(91, 57, 35, 0.11);
+  border-radius: 16px;
+  background: #f8eddf;
+}
+
+.free-shipping-message:empty {
+  display: none;
+}
+
+.free-shipping-message strong {
+  color: var(--brown);
+  font-size: 0.9rem;
+}
+
+.free-shipping-message span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+#checkout-shipping {
+  color: #26734d;
+}
+.shipping-announcement {
+  background: #4a2d1c;
+  color: #fffaf3;
+}
+
+.shipping-announcement-inner {
+  min-height: 38px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.shipping-announcement a {
+  color: #ffd7a8;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.shipping-announcement a:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 600px) {
+  .shipping-announcement-inner {
+    min-height: 42px;
+    gap: 8px;
+    font-size: 0.78rem;
+  }
+}
