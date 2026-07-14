@@ -119,32 +119,58 @@ const categories = ['All', 'Sweets', 'Namkeen', 'Combos'];
 </BaseLayout>
 
 <script is:inline>
-  const tabs = document.querySelectorAll('.category-tab');
-  const items = document.querySelectorAll('.shop-product-item');
-  const count = document.querySelector('.product-count');
+  function setupShopFilters() {
+    const tabs = Array.from(
+      document.querySelectorAll('.category-tab')
+    );
 
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((item) => item.classList.remove('active'));
-      tab.classList.add('active');
+    const items = Array.from(
+      document.querySelectorAll('.shop-product-item')
+    );
 
-      const selected = tab.dataset.category;
-      let visibleCount = 0;
+    const count = document.querySelector('.product-count');
 
-      items.forEach((item) => {
-        const shouldShow =
-          selected === 'All' || item.dataset.category === selected;
+    if (!tabs.length || !items.length) return;
 
-        item.hidden = !shouldShow;
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const selectedCategory = tab.dataset.category;
 
-        if (shouldShow) {
-          visibleCount += 1;
+        tabs.forEach((otherTab) => {
+          otherTab.classList.remove('active');
+          otherTab.setAttribute('aria-pressed', 'false');
+        });
+
+        tab.classList.add('active');
+        tab.setAttribute('aria-pressed', 'true');
+
+        let visibleCount = 0;
+
+        items.forEach((item) => {
+          const itemCategory = item.dataset.category;
+
+          const shouldShow =
+            selectedCategory === 'All' ||
+            itemCategory === selectedCategory;
+
+          item.hidden = !shouldShow;
+
+          if (shouldShow) {
+            visibleCount += 1;
+          }
+        });
+
+        if (count) {
+          count.textContent =
+            `${visibleCount} ${visibleCount === 1 ? 'product' : 'products'}`;
         }
       });
-
-      count.textContent = `${visibleCount} ${
-        visibleCount === 1 ? 'product' : 'products'
-      }`;
     });
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupShopFilters);
+  } else {
+    setupShopFilters();
+  }
 </script>

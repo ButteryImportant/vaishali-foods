@@ -5,6 +5,7 @@ export const products = [
     note: 'Calcium-rich nachni goodness',
     category: 'Sweets',
     featured: true,
+    image: '/images/products/ragi-laddoo.webp',
     variants: [
       { weight: '400 g', price: 440 },
       { weight: '1 kg', price: 990 }
@@ -16,6 +17,7 @@ export const products = [
     note: 'Made with pure ghee',
     category: 'Sweets',
     featured: true,
+    image: '/images/products/besan-laddoo.webp',
     variants: [
       { weight: '400 g', price: 380 },
       { weight: '1 kg', price: 855 }
@@ -27,6 +29,7 @@ export const products = [
     note: 'Dates, nuts and pure ghee',
     category: 'Sweets',
     featured: true,
+    image: '/images/products/khajoor-laddoo.webp',
     variants: [
       { weight: '400 g', price: 520 },
       { weight: '1 kg', price: 1170 }
@@ -38,6 +41,7 @@ export const products = [
     note: 'Light, crisp and savoury',
     category: 'Namkeen',
     featured: false,
+    image: '/images/products/poha-chiwda.webp',
     variants: [
       { weight: '500 g', price: 290 },
       { weight: '1 kg', price: 520 }
@@ -49,6 +53,7 @@ export const products = [
     note: 'Classic festive bites',
     category: 'Sweets',
     featured: false,
+    image: '/images/products/sweet-shankarpale.webp',
     variants: [
       { weight: '400 g', price: 230 },
       { weight: '1 kg', price: 520 }
@@ -60,6 +65,7 @@ export const products = [
     note: 'Crispy namkeen snack',
     category: 'Namkeen',
     featured: false,
+    image: '/images/products/khare-shankarpale.webp',
     variants: [
       { weight: '500 g', price: 280 },
       { weight: '1 kg', price: 500 }
@@ -71,6 +77,7 @@ export const products = [
     note: 'Ragi, besan and khajoor',
     category: 'Combos',
     featured: true,
+    image: '/images/products/laddoo-combo.webp',
     variants: [
       { weight: '9 pieces', price: 499 }
     ]
