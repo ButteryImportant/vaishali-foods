@@ -1,24 +1,181 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import CartDrawer from '../components/CartDrawer.astro';
 import { products } from '../data/products.js';
 
 const featuredProducts = products.filter((product) => product.featured);
 ---
+
 <BaseLayout title="Vaishali Foods | Pure Tradition, Fresh Taste">
-  <main>
-    <section class="hero">
-      <div class="container hero-grid">
-        <div><span class="eyebrow">Homemade Maharashtrian favourites</span><h1>Tradition you can <em>taste.</em></h1><p>Freshly prepared laddoos and snacks made on demand with carefully selected ingredients—packed with warmth, delivered to your doorstep.</p><div class="hero-actions"><a class="btn btn-primary" href="#products">Shop favourites</a><a class="btn btn-secondary" href="#story">Why Vaishali Foods</a></div></div>
-        <div class="hero-art"><img class="hero-logo" src="/images/logo.png" alt="Vaishali Foods emblem" /><div class="hero-badge one">✨ Made on demand</div><div class="hero-badge two">🌿 No preservatives</div></div>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <span class="eyebrow">Homemade Maharashtrian favourites</span>
+
+        <h1>
+          Tradition you can <em>taste.</em>
+        </h1>
+
+        <p>
+          Freshly prepared laddoos and snacks made on demand with carefully
+          selected ingredients—packed with warmth and delivered to your
+          doorstep.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/shop">
+            Shop favourites
+          </a>
+
+          <a class="btn btn-secondary" href="/about">
+            Why Vaishali Foods
+          </a>
+        </div>
       </div>
-    </section>
-    <div class="container trust-row"><div class="trust"><span class="trust-icon">🪔</span><div><strong>Authentic recipes</strong><small>Traditional taste, thoughtfully prepared</small></div></div><div class="trust"><span class="trust-icon">📦</span><div><strong>Freshly packed</strong><small>Prepared after your order</small></div></div><div class="trust"><span class="trust-icon">🚚</span><div><strong>Doorstep delivery</strong><small>Secure shipping across serviceable PIN codes</small></div></div></div>
-    <section class="section" id="products"><div class="container"><div class="section-head"><div><span class="eyebrow">Our collection</span><h2>Choose your favourite</h2></div><p>Product photos are currently placeholders. Drop your final images into <code>public/images/products</code> and update the cards when ready.</p></div><div class="products">{featuredProducts.map((product) => <ProductCard product={product} />)}{products.map(product => <ProductCard product={product} />)}</div></div></section>
-    <section class="section story" id="story"><div class="container story-grid"><div class="story-logo"><img src="/images/logo.png" alt="Vaishali Foods logo" /></div><div><span class="eyebrow" style="color:#ffb283">Our promise</span><h2>Homemade care in every box.</h2><p>Vaishali Foods brings familiar Indian flavours to modern homes without losing the personal touch. Every order is made with attention to taste, hygiene and freshness.</p><div class="chips"><span class="chip">Pure ingredients</span><span class="chip">Made in small batches</span><span class="chip">Best before 1 month</span><span class="chip">Securely packed</span></div></div></div></section>
-    <section class="section" id="contact"><div class="container"><div class="cta"><div><span class="eyebrow" style="color:#ffd1c4">Questions or bulk order?</span><h2>Talk to us on WhatsApp.</h2><p>We’ll help with product selection, delivery and custom gifting orders.</p></div><a class="btn" style="background:white;color:var(--red)" href="https://wa.me/91XXXXXXXXXX" target="_blank" rel="noreferrer">Open WhatsApp</a></div></div></section>
-  </main>
-  <footer class="footer"><div class="container footer-row"><div class="brand"><img src="/images/logo.png" alt="" /><div class="brand-copy"><span>Vaishali Foods</span><small>PURE TRADITION, FRESH TASTE</small></div></div><span>© {new Date().getFullYear()} Vaishali Foods. All rights reserved.</span></div></footer>
-  <CartDrawer />
+
+      <div class="hero-art">
+        <img
+          class="hero-logo"
+          src="/images/logo.png"
+          alt="Vaishali Foods emblem"
+        />
+
+        <div class="hero-badge one">✨ Made on demand</div>
+        <div class="hero-badge two">🌿 No preservatives</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="container trust-row">
+    <div class="trust">
+      <span class="trust-icon">🪔</span>
+
+      <div>
+        <strong>Authentic recipes</strong>
+        <small>Traditional taste, thoughtfully prepared</small>
+      </div>
+    </div>
+
+    <div class="trust">
+      <span class="trust-icon">📦</span>
+
+      <div>
+        <strong>Freshly packed</strong>
+        <small>Prepared after your order</small>
+      </div>
+    </div>
+
+    <div class="trust">
+      <span class="trust-icon">🚚</span>
+
+      <div>
+        <strong>Doorstep delivery</strong>
+        <small>Secure shipping across serviceable PIN codes</small>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="products">
+    <div class="container">
+      <div class="section-head">
+        <div>
+          <span class="eyebrow">Our collection</span>
+          <h2>Customer favourites</h2>
+        </div>
+
+        <p>
+          Explore our most-loved traditional sweets, snacks and gift-ready
+          combinations.
+        </p>
+      </div>
+
+      <div class="products">
+        {
+          featuredProducts.map((product) => (
+            <ProductCard product={product} />
+          ))
+        }
+      </div>
+
+      <div class="section-actions">
+        <a class="btn btn-secondary" href="/shop">
+          View all products
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section story" id="story">
+    <div class="container story-grid">
+      <div class="story-logo">
+        <img src="/images/logo.png" alt="Vaishali Foods logo" />
+      </div>
+
+      <div>
+        <span class="eyebrow" style="color: #ffb283;">
+          Our promise
+        </span>
+
+        <h2>Homemade care in every box.</h2>
+
+        <p>
+          Vaishali Foods brings familiar Indian flavours to modern homes
+          without losing the personal touch. Every order is made with attention
+          to taste, hygiene and freshness.
+        </p>
+
+        <div class="chips">
+          <span class="chip">Pure ingredients</span>
+          <span class="chip">Made in small batches</span>
+          <span class="chip">Best before 1 month</span>
+          <span class="chip">Securely packed</span>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/about">
+            Read our story
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="contact">
+    <div class="container">
+      <div class="cta">
+        <div>
+          <span class="eyebrow" style="color: #ffd1c4;">
+            Questions or bulk order?
+          </span>
+
+          <h2>Talk to Vaishali Foods.</h2>
+
+          <p>
+            We’ll help with product selection, delivery questions and custom
+            gifting orders.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <a
+            class="btn"
+            style="background: white; color: var(--red);"
+            href="/contact"
+          >
+            Contact us
+          </a>
+
+          <a
+            class="btn"
+            style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.35);"
+            href="https://wa.me/91XXXXXXXXXX"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open WhatsApp
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </BaseLayout>
