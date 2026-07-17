@@ -1,0 +1,122 @@
+---
+const { product } = Astro.props;
+const firstVariant = product.variants[0];
+---
+
+<article class="card product-card" data-product-id={product.id}>
+<div class="product-image-wrap">
+  <img
+    class="product-image"
+    src={product.image}
+    alt={product.name}
+    loading="lazy"
+    decoding="async"
+  />
+</div>
+  <div class="card-body">
+    <div class="card-top">
+      <h3>{product.name}</h3>
+
+      <span class="price product-price">
+        {
+          firstVariant.price === null
+            ? 'Price coming soon'
+            : `₹${firstVariant.price}`
+        }
+      </span>
+    </div>
+
+    <p class="meta">
+      <span class="selected-weight">{firstVariant.weight}</span>
+      · {product.note}
+    </p>
+
+    {
+      product.variants.length > 1 && (
+        <div
+          class="variant-picker"
+          role="group"
+          aria-label={`Choose weight for ${product.name}`}
+        >
+          {
+            product.variants.map((variant, index) => (
+              <button
+                type="button"
+                class:list={[
+                  'variant-option',
+                  { active: index === 0 }
+                ]}
+                data-weight={variant.weight}
+                data-price={variant.price ?? ''}
+                aria-pressed={index === 0 ? 'true' : 'false'}
+              >
+                {variant.weight}
+              </button>
+            ))
+          }
+        </div>
+      )
+    }
+
+    <div class="card-actions">
+      <span class="qty-note">Made fresh on demand</span>
+
+      <button
+        type="button"
+        class="btn btn-primary add-to-cart"
+        data-product={JSON.stringify({
+          ...product,
+          weight: firstVariant.weight,
+          price: firstVariant.price
+        })}
+        disabled={firstVariant.price === null}
+      >
+        {firstVariant.price === null ? 'Soon' : 'Add'}
+      </button>
+    </div>
+  </div>
+</article>
+
+<script is:inline>
+  document.querySelectorAll('.product-card').forEach((card) => {
+    const options = card.querySelectorAll('.variant-option');
+
+    if (!options.length) return;
+
+    const priceElement = card.querySelector('.product-price');
+    const weightElement = card.querySelector('.selected-weight');
+    const addButton = card.querySelector('.add-to-cart');
+
+    options.forEach((option) => {
+      option.addEventListener('click', () => {
+        options.forEach((item) => {
+          item.classList.remove('active');
+          item.setAttribute('aria-pressed', 'false');
+        });
+
+        option.classList.add('active');
+        option.setAttribute('aria-pressed', 'true');
+
+        const weight = option.dataset.weight;
+        const rawPrice = option.dataset.price;
+        const price = rawPrice === '' ? null : Number(rawPrice);
+
+        const product = JSON.parse(addButton.dataset.product);
+
+        weightElement.textContent = weight;
+
+        priceElement.textContent =
+          price === null ? 'Price coming soon' : `₹${price}`;
+
+        addButton.disabled = price === null;
+        addButton.textContent = price === null ? 'Soon' : 'Add';
+
+        addButton.dataset.product = JSON.stringify({
+          ...product,
+          weight,
+          price
+        });
+      });
+    });
+  });
+</script>
