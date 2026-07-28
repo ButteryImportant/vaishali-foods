@@ -59,40 +59,4 @@ export const products = [
       { id: 'ragi-chocolate-1kg', weight: '1 kg', weightGrams: 1000, price: 999 }
     ]
   },
-  {
-    id: 'poha-chiwda',
-    name: 'Poha Chiwda',
-    note: 'Light, crisp and savoury',
-    category: 'Namkeen',
-    featured: false,
-    image: '/images/products/poha-chiwda.webp',
-    variants: [
-      { id: 'poha-500g', weight: '500 g', weightGrams: 500, price: 290 },
-      { id: 'poha-1kg', weight: '1 kg', weightGrams: 1000, price: 520 }
-    ]
-  },
-  {
-    id: 'sweet-shankarpale',
-    name: 'Sweet Shankarpale',
-    note: 'Classic festive bites',
-    category: 'Sweets',
-    featured: false,
-    image: '/images/products/sweet-shankarpale.webp',
-    variants: [
-      { id: 'sweet-shankarpale-400g', weight: '400 g', weightGrams: 400, price: 230 },
-      { id: 'sweet-shankarpale-1kg', weight: '1 kg', weightGrams: 1000, price: 520 }
-    ]
-  },
-  {
-    id: 'khare-shankarpale',
-    name: 'Khare Shankarpale',
-    note: 'Crispy namkeen snack',
-    category: 'Namkeen',
-    featured: false,
-    image: '/images/products/khare-shankarpale.webp',
-    variants: [
-      { id: 'khare-shankarpale-500g', weight: '500 g', weightGrams: 500, price: 280 },
-      { id: 'khare-shankarpale-1kg', weight: '1 kg', weightGrams: 1000, price: 500 }
-    ]
-  }
 ];
