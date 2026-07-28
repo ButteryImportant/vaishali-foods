@@ -53,7 +53,7 @@ export const products = [
     note: 'Chocolate Flavour • Ragi Goodness • Energy Snack',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/ragi-chocolate-power-laddoo.webp',
+    image: 'https://cdn.builder.io/api/v1/image/assets%2F4de0b4b90771428698042adb1a396dfc%2Fc47a1bab2d5b4b3f981a390c07d81a7e?format=webp&width=800&height=1200',
     variants: [
       { id: 'ragi-chocolate-400g', weight: '400 g', weightGrams: 400, price: 500 },
       { id: 'ragi-chocolate-1kg', weight: '1 kg', weightGrams: 1000, price: 999 }
