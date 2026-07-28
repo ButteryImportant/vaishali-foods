@@ -72,14 +72,27 @@ export const products = [
     ]
   },
   {
-    id: 'laddoo-combo',
-    name: 'Laddoo Combo Pack',
-    note: 'Ragi, besan and khajoor',
-    category: 'Combos',
+    id: 'til-laddoo',
+    name: 'Til Laddoo',
+    note: 'Sesame seeds with jaggery',
+    category: 'Sweets',
     featured: true,
-    image: '/images/products/laddoo-combo.webp',
+    image: '/images/products/til-laddoo.webp',
     variants: [
-      { id: 'laddoo-combo-9pc', weight: '9 pieces', weightGrams: 400, price: 499 }
+      { id: 'til-400g', weight: '400 g', weightGrams: 400, price: 320 },
+      { id: 'til-1kg', weight: '1 kg', weightGrams: 1000, price: 720 }
+    ]
+  },
+  {
+    id: 'coconut-laddoo',
+    name: 'Coconut Laddoo',
+    note: 'Fresh coconut and dry fruits',
+    category: 'Sweets',
+    featured: true,
+    image: '/images/products/coconut-laddoo.webp',
+    variants: [
+      { id: 'coconut-400g', weight: '400 g', weightGrams: 400, price: 360 },
+      { id: 'coconut-1kg', weight: '1 kg', weightGrams: 1000, price: 810 }
     ]
   }
 ];
