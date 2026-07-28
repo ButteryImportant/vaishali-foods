@@ -41,7 +41,7 @@ export const products = [
     note: 'Calcium Rich • Iron Rich • Sweetened with Jaggery',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/ragi-jaggery-laddoo.webp',
+    image: 'https://cdn.builder.io/api/v1/image/assets%2F4de0b4b90771428698042adb1a396dfc%2F74f72c0660824196a9b9109e93d45861?format=webp&width=800&height=1200',
     variants: [
       { id: 'ragi-jaggery-400g', weight: '400 g', weightGrams: 400, price: 450 },
       { id: 'ragi-jaggery-1kg', weight: '1 kg', weightGrams: 1000, price: 899 }
