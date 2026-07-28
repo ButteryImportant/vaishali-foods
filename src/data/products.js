@@ -17,7 +17,7 @@ export const products = [
     note: 'High Protein • Almond Rich • Great Post Workout',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/almond-protein-laddoo.webp',
+    image: 'https://cdn.builder.io/api/v1/image/assets%2F4de0b4b90771428698042adb1a396dfc%2F711f515b966b48e4a4a28d14f0be342e?format=webp&width=800&height=1200',
     variants: [
       { id: 'almond-400g', weight: '400 g', weightGrams: 400, price: 500 },
       { id: 'almond-1kg', weight: '1 kg', weightGrams: 1000, price: 999 }
