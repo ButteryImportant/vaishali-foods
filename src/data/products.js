@@ -5,7 +5,7 @@ export const products = [
     note: 'No Added Sugar • Premium Dates • Loaded with Dry Fruits',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/khajur-dry-fruit-laddoo.webp',
+    image: 'https://cdn.builder.io/api/v1/image/assets%2F4de0b4b90771428698042adb1a396dfc%2Fb37565128d0d4967a6d81aaa7a0b0b98?format=webp&width=800&height=1200',
     variants: [
       { id: 'khajur-400g', weight: '400 g', weightGrams: 400, price: 560 },
       { id: 'khajur-1kg', weight: '1 kg', weightGrams: 1000, price: 1150 }
