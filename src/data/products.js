@@ -1,38 +1,62 @@
 export const products = [
   {
-    id: 'ragi-laddoo',
-    name: 'Ragi Laddoo',
-    note: 'Calcium-rich nachni goodness',
+    id: 'khajur-dry-fruit-laddoo',
+    name: 'Khajur Dry Fruit Laddoo',
+    note: 'No Added Sugar • Premium Dates • Loaded with Dry Fruits',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/ragi-laddoo.webp',
+    image: '/images/products/khajur-dry-fruit-laddoo.webp',
     variants: [
-      { id: 'ragi-400g', weight: '400 g', weightGrams: 400, price: 440 },
-      { id: 'ragi-1kg', weight: '1 kg', weightGrams: 1000, price: 990 }
+      { id: 'khajur-400g', weight: '400 g', weightGrams: 400, price: 560 },
+      { id: 'khajur-1kg', weight: '1 kg', weightGrams: 1000, price: 1150 }
+    ]
+  },
+  {
+    id: 'almond-protein-laddoo',
+    name: 'Almond Protein Laddoo',
+    note: 'High Protein • Almond Rich • Great Post Workout',
+    category: 'Sweets',
+    featured: true,
+    image: '/images/products/almond-protein-laddoo.webp',
+    variants: [
+      { id: 'almond-400g', weight: '400 g', weightGrams: 400, price: 500 },
+      { id: 'almond-1kg', weight: '1 kg', weightGrams: 1000, price: 999 }
     ]
   },
   {
     id: 'besan-laddoo',
     name: 'Besan Laddoo',
-    note: 'Made with pure ghee',
+    note: 'Pure Ghee • Traditional Recipe • Melt-in-mouth',
     category: 'Sweets',
     featured: true,
     image: '/images/products/besan-laddoo.webp',
     variants: [
-      { id: 'besan-400g', weight: '400 g', weightGrams: 400, price: 380 },
-      { id: 'besan-1kg', weight: '1 kg', weightGrams: 1000, price: 855 }
+      { id: 'besan-400g', weight: '400 g', weightGrams: 400, price: 400 },
+      { id: 'besan-1kg', weight: '1 kg', weightGrams: 1000, price: 799 }
     ]
   },
   {
-    id: 'khajoor-laddoo',
-    name: 'Khajoor Dry Fruit Laddoo',
-    note: 'Dates, nuts and pure ghee',
+    id: 'ragi-jaggery-laddoo',
+    name: 'Ragi Jaggery Laddoo',
+    note: 'Calcium Rich • Iron Rich • Sweetened with Jaggery',
     category: 'Sweets',
     featured: true,
-    image: '/images/products/khajoor-laddoo.webp',
+    image: '/images/products/ragi-jaggery-laddoo.webp',
     variants: [
-      { id: 'khajoor-400g', weight: '400 g', weightGrams: 400, price: 520 },
-      { id: 'khajoor-1kg', weight: '1 kg', weightGrams: 1000, price: 1170 }
+      { id: 'ragi-jaggery-400g', weight: '400 g', weightGrams: 400, price: 450 },
+      { id: 'ragi-jaggery-1kg', weight: '1 kg', weightGrams: 1000, price: 899 }
+    ]
+  },
+  {
+    id: 'ragi-chocolate-power-laddoo',
+    name: 'Ragi Chocolate Power Laddoo',
+    note: 'Chocolate Flavour • Ragi Goodness • Energy Snack',
+    category: 'Sweets',
+    featured: true,
+    image: '/images/products/ragi-chocolate-power-laddoo.webp',
+    variants: [
+      { id: 'ragi-chocolate-400g', weight: '400 g', weightGrams: 400, price: 500 },
+      { id: 'ragi-chocolate-1kg', weight: '1 kg', weightGrams: 1000, price: 999 }
     ]
   },
   {
@@ -69,30 +93,6 @@ export const products = [
     variants: [
       { id: 'khare-shankarpale-500g', weight: '500 g', weightGrams: 500, price: 280 },
       { id: 'khare-shankarpale-1kg', weight: '1 kg', weightGrams: 1000, price: 500 }
-    ]
-  },
-  {
-    id: 'til-laddoo',
-    name: 'Til Laddoo',
-    note: 'Sesame seeds with jaggery',
-    category: 'Sweets',
-    featured: true,
-    image: '/images/products/til-laddoo.webp',
-    variants: [
-      { id: 'til-400g', weight: '400 g', weightGrams: 400, price: 320 },
-      { id: 'til-1kg', weight: '1 kg', weightGrams: 1000, price: 720 }
-    ]
-  },
-  {
-    id: 'coconut-laddoo',
-    name: 'Coconut Laddoo',
-    note: 'Fresh coconut and dry fruits',
-    category: 'Sweets',
-    featured: true,
-    image: '/images/products/coconut-laddoo.webp',
-    variants: [
-      { id: 'coconut-400g', weight: '400 g', weightGrams: 400, price: 360 },
-      { id: 'coconut-1kg', weight: '1 kg', weightGrams: 1000, price: 810 }
     ]
   }
 ];
