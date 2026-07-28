@@ -24,39 +24,5 @@
         <span class="cart-count" id="cart-count">0</span>
       </button>
     </nav>
-
-    <button
-      type="button"
-      class="mobile-menu-toggle"
-      id="mobile-menu-toggle"
-      aria-label="Toggle mobile menu"
-    >
-      <span></span>
-      <span></span>
-      <span></span>
-    </button>
   </div>
-
-  <nav class="mobile-nav" id="mobile-nav">
-    <a href="/">Home</a>
-    <a href="/shop">Shop</a>
-    <a href="/about">Our Story</a>
-    <a href="/contact">Contact</a>
-  </nav>
 </header>
-
-<script is:inline>
-  const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
-  const mobileNav = document.getElementById('mobile-nav');
-
-  mobileMenuToggle?.addEventListener('click', () => {
-    mobileNav?.classList.toggle('open');
-  });
-
-  // Close menu when a link is clicked
-  mobileNav?.querySelectorAll('a').forEach((link) => {
-    link.addEventListener('click', () => {
-      mobileNav.classList.remove('open');
-    });
-  });
-</script>

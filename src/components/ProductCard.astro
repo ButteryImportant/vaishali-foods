@@ -3,7 +3,6 @@ const { product } = Astro.props;
 const firstVariant = product.variants[0];
 ---
 
-<a href={`/products/${product.id}`} class="product-card-link">
 <article class="card product-card" data-product-id={product.id}>
 <div class="product-image-wrap">
   <img
@@ -81,7 +80,6 @@ const firstVariant = product.variants[0];
     </div>
   </div>
 </article>
-</a>
 
 <script is:inline>
   document.querySelectorAll('.product-card').forEach((card) => {
