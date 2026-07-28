@@ -3,6 +3,7 @@ const { product } = Astro.props;
 const firstVariant = product.variants[0];
 ---
 
+<a href={`/products/${product.id}`} class="product-card-link">
 <article class="card product-card" data-product-id={product.id}>
 <div class="product-image-wrap">
   <img
@@ -47,6 +48,8 @@ const firstVariant = product.variants[0];
                   { active: index === 0 }
                 ]}
                 data-weight={variant.weight}
+                data-variant-id={variant.id}
+                data-weight-grams={variant.weightGrams}
                 data-price={variant.price ?? ''}
                 aria-pressed={index === 0 ? 'true' : 'false'}
               >
@@ -66,7 +69,9 @@ const firstVariant = product.variants[0];
         class="btn btn-primary add-to-cart"
         data-product={JSON.stringify({
           ...product,
+          variantId: firstVariant.id,
           weight: firstVariant.weight,
+          weightGrams: firstVariant.weightGrams,
           price: firstVariant.price
         })}
         disabled={firstVariant.price === null}
@@ -76,6 +81,7 @@ const firstVariant = product.variants[0];
     </div>
   </div>
 </article>
+</a>
 
 <script is:inline>
   document.querySelectorAll('.product-card').forEach((card) => {
@@ -98,6 +104,8 @@ const firstVariant = product.variants[0];
         option.setAttribute('aria-pressed', 'true');
 
         const weight = option.dataset.weight;
+        const variantId = option.dataset.variantId;
+        const weightGrams = Number(option.dataset.weightGrams);
         const rawPrice = option.dataset.price;
         const price = rawPrice === '' ? null : Number(rawPrice);
 
@@ -113,7 +121,9 @@ const firstVariant = product.variants[0];
 
         addButton.dataset.product = JSON.stringify({
           ...product,
+          variantId,
           weight,
+          weightGrams,
           price
         });
       });

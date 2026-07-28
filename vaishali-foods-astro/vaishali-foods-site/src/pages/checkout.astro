@@ -444,7 +444,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         amount: Number(data.shipping),
         pincode,
         courier: data.courier,
-        packedWeight: data.packedWeight
+        carrier: data.carrier,
+        actualWeightGrams: data.actualWeightGrams,
+        volumetricWeightGrams: data.volumetricWeightGrams,
+        chargeableWeightGrams: data.chargeableWeightGrams,
+        dimensions: data.dimensions
       };
 
       renderCartTotals();
@@ -792,7 +796,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 headers: {
                   'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(paymentResponse)
+                body: JSON.stringify({
+                  ...paymentResponse,
+                  customer,
+                  cart: cart.map((item) => ({
+                    id: item.id,
+                    weight: item.weight,
+                    qty: Number(item.qty || 1)
+                  }))
+                })
               }
             );
 
@@ -828,14 +840,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 orderId: verification.order_id,
                 customer,
                 cart,
-                shipping: verifiedShipping
+                shipping: verifiedShipping,
+                shipmentCreated: verification.shipmentCreated,
+                carrier: verification.carrier,
+                shipmentError: verification.shipmentError || null
               })
             );
 
             localStorage.removeItem(CART_KEY);
 
             alert(
-              `Payment successful! Payment ID: ${verification.payment_id}`
+              verification.shipmentCreated
+                ? `Payment successful! Your ${verification.carrier} shipment has been created.`
+                : `Payment successful! Your order is confirmed. Shipment booking will be completed manually.`
             );
 
             window.location.href = '/';
