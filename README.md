@@ -58,3 +58,4 @@ Add these in **Cloudflare Dashboard → Workers & Pages → your project → Set
 - `SHIPROCKET_VOLUMETRIC_DIVISOR`
 
 Use `.dev.vars.example` as the local template. Never commit `.dev.vars` or `.env`.
+
