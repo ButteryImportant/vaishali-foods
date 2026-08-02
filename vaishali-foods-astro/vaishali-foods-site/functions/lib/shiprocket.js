@@ -1,6 +1,7 @@
 let cachedToken = null;
 let tokenExpiresAt = 0;
 let cachedTokenKey = null;
+let loginRetryAfter = 0;
 
 function parseJsonSafely(text) {
   try {
@@ -30,7 +31,15 @@ export async function getShiprocketToken(env) {
   }
 
   if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) {
-    throw new Error('Shiprocket credentials are missing.');
+    throw new Error(
+      'Shiprocket credentials are missing. Set SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD.'
+    );
+  }
+
+  if (now < loginRetryAfter) {
+    throw new Error(
+      'Shiprocket login is temporarily unavailable. Check that SHIPROCKET_EMAIL and SHIPROCKET_PASSWORD are correct, and reset the Shiprocket password if the account is blocked.'
+    );
   }
 
   const response = await fetch(
@@ -51,6 +60,7 @@ export async function getShiprocketToken(env) {
       status: response.status,
       body: text
     });
+    loginRetryAfter = now + 15 * 60 * 1000;
     throw new Error(
       data?.message ||
         `Unable to authenticate with Shiprocket (${response.status}).`
