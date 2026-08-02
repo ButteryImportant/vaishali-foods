@@ -1,12 +1,5 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store'
-    }
-  });
-}
+// Route: functions/api/verify-payment.js -> POST /api/verify-payment
+import { json, methodGuard } from '../lib/http.js';
 
 function bytesToHex(bytes) {
   return Array.from(bytes)
@@ -39,7 +32,7 @@ function safeEqual(first, second) {
   return difference === 0;
 }
 
-export async function onRequestPost(context) {
+async function handleVerifyPayment(context) {
   const { request, env } = context;
 
   if (!env.RAZORPAY_KEY_SECRET) {
@@ -74,3 +67,5 @@ export async function onRequestPost(context) {
     message: 'Payment verified.'
   });
 }
+
+export const onRequest = methodGuard(['POST'], handleVerifyPayment);

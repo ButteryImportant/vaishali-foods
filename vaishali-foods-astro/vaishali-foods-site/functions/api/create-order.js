@@ -1,16 +1,8 @@
+// Route: functions/api/create-order.js -> POST /api/create-order
 import { validateCart, calculateSubtotal } from '../lib/catalog.js';
+import { json, methodGuard } from '../lib/http.js';
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-store'
-    }
-  });
-}
-
-export async function onRequestPost(context) {
+async function handleCreateOrder(context) {
   const { request, env } = context;
 
   if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
@@ -37,6 +29,14 @@ export async function onRequestPost(context) {
   }
 
   const subtotal = calculateSubtotal(validatedCart);
+  // NOTE: shipping is still hard-coded to 0 here, unchanged from before.
+  // Now that shipping-rate returns multiple courier options with different
+  // prices, this endpoint will need to receive the *selected* courier's
+  // amount from the frontend (and re-verify it) before it can charge the
+  // real total. Flagging this since it's now visibly inconsistent with the
+  // new multi-courier flow, but leaving the logic as-is since it's outside
+  // the reported bug and I don't have the checkout page to wire it up
+  // safely — happy to do that next if you share it.
   const shipping = 0;
   const total = subtotal + shipping;
   const amount = Math.round(total * 100);
@@ -84,3 +84,5 @@ export async function onRequestPost(context) {
     return json({ error: 'Unable to connect to the payment service.' }, 500);
   }
 }
+
+export const onRequest = methodGuard(['POST'], handleCreateOrder);

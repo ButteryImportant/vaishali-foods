@@ -255,6 +255,35 @@ export async function getShippingQuoteOptions({
   }
 }
 
+/**
+ * Backward-compatible single-courier quote.
+ *
+ * Older callers (and any code that hasn't been migrated to the new
+ * multi-courier UI yet) may still import `getShippingQuote`. This wraps
+ * `getShippingQuoteOptions` and returns the previous shape — a single
+ * `amount` + `courier` — using the cheapest option, while still exposing
+ * the full `options` array so callers can migrate incrementally.
+ */
+export async function getShippingQuote(params) {
+  const quote = await getShippingQuoteOptions(params);
+  const [cheapest] = quote.options;
+
+  if (!cheapest) {
+    throw new Error('No valid courier options were found.');
+  }
+
+  return {
+    ...quote,
+    amount: cheapest.amount,
+    courier: {
+      id: cheapest.id,
+      name: cheapest.name,
+      estimatedDeliveryDays: cheapest.estimatedDeliveryDays,
+      etd: cheapest.etd
+    }
+  };
+}
+
 export function selectCourierById(courierOptions, courierId) {
   const selected = courierOptions.find(
     (option) => String(option.id) === String(courierId)
