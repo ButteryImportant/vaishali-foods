@@ -2,10 +2,27 @@ const INCH_TO_CM = 2.54;
 
 let cachedToken = null;
 let tokenExpiresAt = 0;
+let cachedTokenKey = null;
 
 function round(value, digits = 2) {
   const factor = 10 ** digits;
   return Math.round(value * factor) / factor;
+}
+
+function parseJsonSafely(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function readJsonResponse(response) {
+  const text = await response.text();
+  return {
+    text,
+    data: parseJsonSafely(text)
+  };
 }
 
 export function getEstimatedShippingAmount({ providerAmount }) {
@@ -18,19 +35,23 @@ export function getEstimatedShippingAmount({ providerAmount }) {
   return Math.ceil(amount);
 }
 
-// 1. AUTHENTICATION MODULE (CORRECTED DEPLOYMENT BASE ADDRESS)
 export async function getShiprocketToken(env) {
   const now = Date.now();
-
-  if (cachedToken && now < tokenExpiresAt) {
-    return cachedToken;
-  }
 
   if (!env.SHIPROCKET_EMAIL || !env.SHIPROCKET_PASSWORD) {
     throw new Error('Shiprocket credentials are missing.');
   }
 
-  // FIXED: Changed from 'https://shiprocket.in' to the accurate backend server login address
+  const tokenKey = `${env.SHIPROCKET_EMAIL}:${env.SHIPROCKET_PASSWORD}`;
+
+  if (
+    cachedToken &&
+    cachedTokenKey === tokenKey &&
+    now < tokenExpiresAt
+  ) {
+    return cachedToken;
+  }
+
   const response = await fetch(
     'https://apiv2.shiprocket.in/v1/external/auth/login',
     {
@@ -42,29 +63,42 @@ export async function getShiprocketToken(env) {
       })
     }
   );
-  const data = await response.json().catch(() => ({}));
 
-  if (!response.ok || !data.token) {
-    console.error('Shiprocket login error:', data);
-    throw new Error('Unable to authenticate with Shiprocket.');
+  const { text, data } = await readJsonResponse(response);
+
+  if (!response.ok || !data?.token) {
+    console.error('Shiprocket login error:', {
+      status: response.status,
+      body: text
+    });
+
+    throw new Error(
+      data?.message ||
+        `Unable to authenticate with Shiprocket (${response.status}).`
+    );
   }
 
   cachedToken = data.token;
-  tokenExpiresAt = now + 23 * 60 * 60 * 1000; 
+  cachedTokenKey = tokenKey;
+  tokenExpiresAt = now + 23 * 60 * 60 * 1000;
+
   return cachedToken;
 }
 
-// 2. SHIPPING PROFILE MATH MODULE
 export function calculateShippingProfile(validatedCart, env) {
-  const totalQuantity = validatedCart.reduce((total, item) => total + item.qty, 0);
-  
+  const totalQuantity = validatedCart.reduce(
+    (total, item) => total + item.qty,
+    0
+  );
+
   const actualWeightGrams = validatedCart.reduce(
     (total, item) => total + item.weightGrams * item.qty,
     0
   );
 
   const baseHeightInches = 6;
-  const scaledHeightInches = baseHeightInches * Math.max(1, Math.min(totalQuantity, 4)); 
+  const scaledHeightInches =
+    baseHeightInches * Math.max(1, Math.min(totalQuantity, 4));
 
   const dimensions = {
     lengthCm: round(9 * INCH_TO_CM),
@@ -81,6 +115,7 @@ export function calculateShippingProfile(validatedCart, env) {
   const volumetricWeightKg =
     (dimensions.lengthCm * dimensions.breadthCm * dimensions.heightCm) /
     volumetricDivisor;
+
   const volumetricWeightGrams = Math.ceil(volumetricWeightKg * 1000);
   const chargeableWeightGrams = Math.max(
     actualWeightGrams,
@@ -93,12 +128,11 @@ export function calculateShippingProfile(validatedCart, env) {
     volumetricWeightGrams,
     chargeableWeightGrams,
     chargeableWeightKg: round(chargeableWeightGrams / 1000, 3),
-    actualWeightKg: round(actualWeightGrams / 1000, 3), 
+    actualWeightKg: round(actualWeightGrams / 1000, 3),
     dimensions
   };
 }
 
-// 3. SERVICEABILITY RATES FETCH MODULE (CORRECTED RATE ADDRESS)
 export async function getShippingRates({
   env,
   deliveryPincode,
@@ -112,6 +146,7 @@ export async function getShippingRates({
   }
 
   const token = await getShiprocketToken(env);
+
   const params = new URLSearchParams({
     pickup_postcode: String(env.SHIPROCKET_PICKUP_PIN),
     delivery_postcode: String(deliveryPincode),
@@ -119,18 +154,16 @@ export async function getShippingRates({
     cod: cod ? '1' : '0',
     length: String(Number(dimensions.lengthCm) || 0),
     breadth: String(Number(dimensions.breadthCm) || 0),
-    height: String(Number(dimensions.heightCm) || 0)
+    height: String(Number(dimensions.heightCm) || 0),
+    mode: 'Surface'
   });
 
   if (Number.isFinite(Number(declaredValue))) {
     params.set('declared_value', String(Math.round(Number(declaredValue))));
   }
 
-  params.set('mode', 'Surface');
-
-  // FIXED: Swapped out the broken text template format for the exact data endpoint
   const response = await fetch(
-    `https://shiprocket.in{params}`,
+    `https://apiv2.shiprocket.in/v1/external/courier/serviceability?${params.toString()}`,
     {
       method: 'GET',
       headers: {
@@ -139,14 +172,32 @@ export async function getShippingRates({
       }
     }
   );
-  const data = await response.json().catch(() => ({}));
 
-  if (!response.ok) {
-    console.error('Shiprocket serviceability error:', data);
-    throw new Error(data?.message || 'Unable to calculate Shiprocket shipping.');
+  const { text, data } = await readJsonResponse(response);
+
+  if (response.status === 401) {
+    cachedToken = null;
+    cachedTokenKey = null;
+    tokenExpiresAt = 0;
   }
 
-  const couriers = data?.data?.available_counter_companies || data?.data?.available_courier_companies;
+  if (!response.ok) {
+    console.error('Shiprocket serviceability error:', {
+      status: response.status,
+      body: text
+    });
+
+    throw new Error(
+      data?.message ||
+        `Unable to calculate Shiprocket shipping (${response.status}).`
+    );
+  }
+
+  const couriers =
+    data?.data?.available_courier_companies ||
+    data?.data?.available_counter_companies ||
+    [];
+
   if (!Array.isArray(couriers) || couriers.length === 0) {
     throw new Error('No courier service is available for this PIN code.');
   }
@@ -154,7 +205,6 @@ export async function getShippingRates({
   return couriers;
 }
 
-// 4. SORTING CALCULATOR
 export function selectCheapestCourier(couriers) {
   const validCouriers = couriers.filter((courier) => {
     const rate = Number(courier.rate);
@@ -168,7 +218,6 @@ export function selectCheapestCourier(couriers) {
   return validCouriers.sort((a, b) => Number(a.rate) - Number(b.rate))[0];
 }
 
-// 5. CHANNELS ENTRY POINT FOR ASTRO
 export async function getShippingQuote({
   env,
   validatedCart,
@@ -182,14 +231,16 @@ export async function getShippingQuote({
     const couriers = await getShippingRates({
       env,
       deliveryPincode,
-      weight: profile.actualWeightKg, 
+      weight: profile.actualWeightKg,
       dimensions: profile.dimensions,
       cod: paymentMethod === 'cod',
       declaredValue: orderValue
     });
-    
+
     const cheapest = selectCheapestCourier(couriers);
-    const amount = getEstimatedShippingAmount({ providerAmount: cheapest.rate });
+    const amount = getEstimatedShippingAmount({
+      providerAmount: cheapest.rate
+    });
 
     return {
       ...profile,
@@ -202,25 +253,26 @@ export async function getShippingQuote({
       }
     };
   } catch (error) {
-    console.error("Critical Shipping Interception Failure:", error);
+    console.error('Critical Shipping Interception Failure:', error);
     throw new Error(`Shipping calculation unavailable: ${error.message}`);
   }
 }
 
-// 6. ORDER FULFILLMENT CREATION MODULE (CORRECTED ORDER DISPATCH CREATION ADDRESS)
 export async function createShiprocketShipment({
   env,
   customer,
   validatedCart,
   orderId,
   orderTotal,
-  profile
+  profile,
+  paymentMethod = 'prepaid'
 }) {
   if (!env.SHIPROCKET_PICKUP_LOCATION) {
     throw new Error('Shiprocket pickup location is missing.');
   }
 
   const token = await getShiprocketToken(env);
+
   const payload = {
     order_id: orderId,
     order_date: new Date().toISOString().slice(0, 10),
@@ -239,7 +291,7 @@ export async function createShiprocketShipment({
     billing_phone: customer.phone,
     shipping_is_billing: true,
     order_items: validatedCart.map((item) => ({
-      name: `${item.name} - ${item.weight || ''}`,
+      name: `${item.name}${item.weight ? ` - ${item.weight}` : ''}`,
       sku: item.variantId,
       units: item.qty,
       selling_price: item.price,
@@ -247,15 +299,14 @@ export async function createShiprocketShipment({
       tax: 0,
       hsn: ''
     })),
-    payment_method: 'Prepaid',
+    payment_method: paymentMethod === 'cod' ? 'COD' : 'Prepaid',
     sub_total: orderTotal,
-    weight: profile.actualWeightKg, 
+    weight: profile.actualWeightKg,
     length: profile.dimensions.lengthCm,
     breadth: profile.dimensions.breadthCm,
     height: profile.dimensions.heightCm
   };
 
-  // FIXED: Pointing directly to the official order sync engine channel 
   const response = await fetch(
     'https://apiv2.shiprocket.in/v1/external/orders/create/adhoc',
     {
@@ -267,11 +318,25 @@ export async function createShiprocketShipment({
       body: JSON.stringify(payload)
     }
   );
-  const data = await response.json().catch(() => ({}));
+
+  const { text, data } = await readJsonResponse(response);
+
+  if (response.status === 401) {
+    cachedToken = null;
+    cachedTokenKey = null;
+    tokenExpiresAt = 0;
+  }
 
   if (!response.ok) {
-    console.error('Shiprocket shipment error:', data);
-    throw new Error(data?.message || 'Shiprocket shipment creation failed.');
+    console.error('Shiprocket shipment error:', {
+      status: response.status,
+      body: text
+    });
+
+    throw new Error(
+      data?.message ||
+        `Shiprocket shipment creation failed (${response.status}).`
+    );
   }
 
   return data;
