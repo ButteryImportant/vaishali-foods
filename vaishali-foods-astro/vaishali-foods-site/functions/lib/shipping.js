@@ -32,7 +32,7 @@ export function getEstimatedShippingAmount({ providerAmount }) {
     return 0;
   }
 
-  return Math.ceil(amount);
+  return Math.round(amount);
 }
 
 export async function getShiprocketToken(env) {
@@ -44,11 +44,7 @@ export async function getShiprocketToken(env) {
 
   const tokenKey = `${env.SHIPROCKET_EMAIL}:${env.SHIPROCKET_PASSWORD}`;
 
-  if (
-    cachedToken &&
-    cachedTokenKey === tokenKey &&
-    now < tokenExpiresAt
-  ) {
+  if (cachedToken && cachedTokenKey === tokenKey && now < tokenExpiresAt) {
     return cachedToken;
   }
 
@@ -205,20 +201,26 @@ export async function getShippingRates({
   return couriers;
 }
 
-export function selectCheapestCourier(couriers) {
-  const validCouriers = couriers.filter((courier) => {
-    const rate = Number(courier.rate);
-    return Number.isFinite(rate) && rate > 0 && courier.courier_company_id;
-  });
-
-  if (validCouriers.length === 0) {
-    throw new Error('No valid courier rate was found.');
-  }
-
-  return validCouriers.sort((a, b) => Number(a.rate) - Number(b.rate))[0];
+export function listAvailableCouriers(couriers) {
+  return couriers
+    .filter((courier) => {
+      const rate = Number(courier.rate);
+      return Number.isFinite(rate) && rate > 0 && courier.courier_company_id;
+    })
+    .map((courier) => ({
+      id: courier.courier_company_id,
+      name: courier.courier_name,
+      amount: getEstimatedShippingAmount({ providerAmount: courier.rate }),
+      providerAmount: Number(courier.rate),
+      estimatedDeliveryDays: courier.estimated_delivery_days || null,
+      etd: courier.etd || null,
+      cod: courier.cod || 0,
+      courierData: courier
+    }))
+    .sort((a, b) => a.providerAmount - b.providerAmount);
 }
 
-export async function getShippingQuote({
+export async function getShippingQuoteOptions({
   env,
   validatedCart,
   deliveryPincode,
@@ -237,25 +239,32 @@ export async function getShippingQuote({
       declaredValue: orderValue
     });
 
-    const cheapest = selectCheapestCourier(couriers);
-    const amount = getEstimatedShippingAmount({
-      providerAmount: cheapest.rate
-    });
+    const options = listAvailableCouriers(couriers);
+
+    if (!options.length) {
+      throw new Error('No valid courier options were found.');
+    }
 
     return {
       ...profile,
-      amount,
-      courier: {
-        id: cheapest.courier_company_id,
-        name: cheapest.courier_name,
-        estimatedDeliveryDays: cheapest.estimated_delivery_days || null,
-        etd: cheapest.etd || null
-      }
+      options
     };
   } catch (error) {
     console.error('Critical Shipping Interception Failure:', error);
     throw new Error(`Shipping calculation unavailable: ${error.message}`);
   }
+}
+
+export function selectCourierById(courierOptions, courierId) {
+  const selected = courierOptions.find(
+    (option) => String(option.id) === String(courierId)
+  );
+
+  if (!selected) {
+    throw new Error('Selected courier is not available.');
+  }
+
+  return selected;
 }
 
 export async function createShiprocketShipment({
