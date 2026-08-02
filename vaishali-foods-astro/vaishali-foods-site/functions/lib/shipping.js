@@ -12,14 +12,18 @@ export function getEstimatedShippingAmount({ providerAmount, profile, orderValue
   const amount = Number(providerAmount);
 
   if (!Number.isFinite(amount) || amount <= 0) {
-    return 70;
+    return 0;
   }
 
   const weightThreshold = profile?.chargeableWeightGrams || 0;
-  const isHeavy = weightThreshold >= 1500;
-  const isLargeOrder = Number(orderValue) >= 1500;
+  const isHeavy = weightThreshold >= 2500;
+  const isLargeOrder = Number(orderValue) >= 2500;
 
-  if (isHeavy || isLargeOrder || amount > 120) {
+  if ((isHeavy || isLargeOrder) && amount > 140) {
+    return 70;
+  }
+
+  if (amount > 300) {
     return 70;
   }
 
