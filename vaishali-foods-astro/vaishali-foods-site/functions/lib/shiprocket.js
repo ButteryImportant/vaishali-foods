@@ -4,6 +4,7 @@ let tokenExpiresAt = 0;
 export async function getShiprocketToken(env) {
   const now = Date.now();
 
+  // FIX: Token validation safety window
   if (cachedToken && now < tokenExpiresAt) {
     return cachedToken;
   }
@@ -31,7 +32,8 @@ export async function getShiprocketToken(env) {
   }
 
   cachedToken = data.token;
-  tokenExpiresAt = now + 9 * 24 * 60 * 60 * 1000;
+  // FIX: Shiprocket tokens expire strictly in 24 hours. We expire it safely at 23 hours locally.
+  tokenExpiresAt = now + 23 * 60 * 60 * 1000; 
   return cachedToken;
 }
 
@@ -99,9 +101,8 @@ export function selectCheapestCourier(couriers) {
     throw new Error('No valid courier rate was found.');
   }
 
-  // Use the primary serviceability option returned by Shiprocket so the site
-  // mirrors the quote that Shiprocket presents to the merchant.
-  return validCouriers[0];
+  // FIX: Shiprocket doesn't return sorted arrays. Sort ascending to explicitly pick the cheapest rate.
+  return validCouriers.sort((a, b) => Number(a.rate) - Number(b.rate))[0];
 }
 
 export async function createShiprocketShipment({
@@ -135,7 +136,7 @@ export async function createShiprocketShipment({
     billing_phone: customer.phone,
     shipping_is_billing: true,
     order_items: validatedCart.map((item) => ({
-      name: `${item.name} - ${item.weight}`,
+      name: `${item.name} - ${item.weight || ''}`,
       sku: item.variantId,
       units: item.qty,
       selling_price: item.price,
@@ -145,7 +146,7 @@ export async function createShiprocketShipment({
     })),
     payment_method: 'Prepaid',
     sub_total: orderTotal,
-    weight: profile.actualWeightGrams / 1000,
+    weight: profile.actualWeightKg, // FIX: Pass raw dead weight in KG to match order placement dimensions
     length: profile.dimensions.lengthCm,
     breadth: profile.dimensions.breadthCm,
     height: profile.dimensions.heightCm
