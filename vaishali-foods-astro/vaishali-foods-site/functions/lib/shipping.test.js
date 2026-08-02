@@ -2,26 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getEstimatedShippingAmount } from './shipping.js';
 
-test('returns the provider amount directly for a courier quote', () => {
+test('returns a sensible estimate for a 1.5kg order', () => {
   const profile = {
     actualWeightGrams: 1500,
     chargeableWeightGrams: 1500
   };
 
-  assert.equal(
-    getEstimatedShippingAmount({ providerAmount: 500, profile, orderValue: 1000 }),
-    500
-  );
+  assert.equal(getEstimatedShippingAmount({ profile }), 80);
 });
 
-test('keeps a reasonable courier quote when it is already in range', () => {
+test('returns a lower estimate for a light order', () => {
   const profile = {
     actualWeightGrams: 800,
     chargeableWeightGrams: 800
   };
 
-  assert.equal(
-    getEstimatedShippingAmount({ providerAmount: 55, profile, orderValue: 800 }),
-    55
-  );
+  assert.equal(getEstimatedShippingAmount({ profile }), 60);
 });

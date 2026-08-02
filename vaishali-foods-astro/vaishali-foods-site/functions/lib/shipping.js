@@ -8,14 +8,30 @@ function round(value, digits = 2) {
   return Math.round(value * factor) / factor;
 }
 
-export function getEstimatedShippingAmount({ providerAmount }) {
-  const amount = Number(providerAmount);
+export function getEstimatedShippingAmount({ profile }) {
+  const weightGrams = Number(profile?.chargeableWeightGrams || 0);
 
-  if (!Number.isFinite(amount) || amount <= 0) {
-    return 0;
+  if (!Number.isFinite(weightGrams) || weightGrams <= 0) {
+    return 40;
   }
 
-  return Math.ceil(amount);
+  if (weightGrams <= 500) {
+    return 40;
+  }
+
+  if (weightGrams <= 1000) {
+    return 60;
+  }
+
+  if (weightGrams <= 2000) {
+    return 80;
+  }
+
+  if (weightGrams <= 3000) {
+    return 100;
+  }
+
+  return 120;
 }
 
 export function calculateShippingProfile(validatedCart, env) {
@@ -103,11 +119,7 @@ export async function getShippingQuote({
     });
     const cheapest = selectCheapestCourier(couriers);
 
-    const amount = getEstimatedShippingAmount({
-      providerAmount: cheapest.rate,
-      profile,
-      orderValue
-    });
+    const amount = getEstimatedShippingAmount({ profile });
 
     return {
       ...profile,
