@@ -46,6 +46,7 @@ export async function onRequestPost(context) {
       success: true,
       shipping: quote.amount,
       carrier: quote.carrier,
+      estimateSource: quote.estimateSource || 'provider',
       actualWeightGrams: quote.actualWeightGrams,
       volumetricWeightGrams: quote.volumetricWeightGrams,
       chargeableWeightGrams: quote.chargeableWeightGrams,

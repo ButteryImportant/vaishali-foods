@@ -445,6 +445,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         pincode,
         courier: data.courier,
         carrier: data.carrier,
+        estimateSource: data.estimateSource || 'provider',
         actualWeightGrams: data.actualWeightGrams,
         volumetricWeightGrams: data.volumetricWeightGrams,
         chargeableWeightGrams: data.chargeableWeightGrams,
@@ -461,9 +462,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         verifiedShipping.courier?.etd ||
         verifiedShipping.courier?.estimatedDeliveryDays;
 
+      const estimateLabel =
+        verifiedShipping.estimateSource === 'fallback'
+          ? 'Estimated shipping charge'
+          : 'Selected delivery partner';
+
       shippingStatus.textContent = estimate
         ? `${courierName} · Estimated delivery: ${estimate}`
-        : `${courierName} selected`;
+        : `${estimateLabel}`;
 
       setPaymentButtonsDisabled(false);
     } catch (error) {
