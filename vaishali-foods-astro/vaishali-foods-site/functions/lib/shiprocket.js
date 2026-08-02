@@ -96,9 +96,9 @@ export function selectCheapestCourier(couriers) {
     throw new Error('No valid courier rate was found.');
   }
 
-  return validCouriers.reduce((cheapest, courier) =>
-    Number(courier.rate) < Number(cheapest.rate) ? courier : cheapest
-  );
+  // Use the primary serviceability option returned by Shiprocket so the site
+  // mirrors the quote that Shiprocket presents to the merchant.
+  return validCouriers[0];
 }
 
 export async function createShiprocketShipment({

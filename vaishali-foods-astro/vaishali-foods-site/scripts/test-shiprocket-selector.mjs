@@ -20,5 +20,5 @@ const couriers = [
 ];
 
 const selected = selectCheapestCourier(couriers);
-assert.equal(selected.rate, '149');
+assert.equal(selected.rate, '226');
 console.log('Selected rate:', selected.rate);
