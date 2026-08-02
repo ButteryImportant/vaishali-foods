@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { getEstimatedShippingAmount } from './shipping.js';
 
-test('uses a fallback shipping charge for implausibly high courier quotes', () => {
+test('returns the provider amount directly for a courier quote', () => {
   const profile = {
     actualWeightGrams: 1500,
     chargeableWeightGrams: 1500
@@ -10,7 +10,7 @@ test('uses a fallback shipping charge for implausibly high courier quotes', () =
 
   assert.equal(
     getEstimatedShippingAmount({ providerAmount: 500, profile, orderValue: 1000 }),
-    70
+    500
   );
 });
 

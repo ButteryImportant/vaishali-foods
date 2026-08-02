@@ -8,23 +8,11 @@ function round(value, digits = 2) {
   return Math.round(value * factor) / factor;
 }
 
-export function getEstimatedShippingAmount({ providerAmount, profile, orderValue }) {
+export function getEstimatedShippingAmount({ providerAmount }) {
   const amount = Number(providerAmount);
 
   if (!Number.isFinite(amount) || amount <= 0) {
     return 0;
-  }
-
-  const weightThreshold = profile?.chargeableWeightGrams || 0;
-  const isHeavy = weightThreshold >= 2500;
-  const isLargeOrder = Number(orderValue) >= 2500;
-
-  if ((isHeavy || isLargeOrder) && amount > 140) {
-    return 70;
-  }
-
-  if (amount > 300) {
-    return 70;
   }
 
   return Math.ceil(amount);
