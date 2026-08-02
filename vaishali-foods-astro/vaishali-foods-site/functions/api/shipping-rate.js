@@ -1,5 +1,5 @@
 import { validateCart, calculateSubtotal } from '../lib/catalog.js';
-import { getShippingQuote } from '../lib/shipping.js';
+import { getShippingQuoteOptions } from '../lib/shipping.js';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -34,7 +34,7 @@ export async function onRequestPost(context) {
   }
 
   try {
-    const quote = await getShippingQuote({
+   const quote = await getShippingQuoteOptions({
       env,
       validatedCart,
       deliveryPincode,
