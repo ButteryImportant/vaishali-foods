@@ -82,24 +82,59 @@ export async function getShippingQuote({
     };
   }
 
-  const couriers = await getShippingRates({
-    env,
-    deliveryPincode,
-    weight: profile.chargeableWeightKg,
-    dimensions: profile.dimensions,
-    cod: paymentMethod === 'cod',
-    declaredValue: orderValue
-  });
-  const cheapest = selectCheapestCourier(couriers);
+  try {
+    const couriers = await getShippingRates({
+      env,
+      deliveryPincode,
+      weight: profile.chargeableWeightKg,
+      dimensions: profile.dimensions,
+      cod: paymentMethod === 'cod',
+      declaredValue: orderValue
+    });
+    const cheapest = selectCheapestCourier(couriers);
 
-  return {
-    ...profile,
-    amount: Math.ceil(Number(cheapest.rate)),
-    courier: {
-      id: cheapest.courier_company_id,
-      name: cheapest.courier_name,
-      estimatedDeliveryDays: cheapest.estimated_delivery_days || null,
-      etd: cheapest.etd || null
+    return {
+      ...profile,
+      amount: Math.ceil(Number(cheapest.rate)),
+      courier: {
+        id: cheapest.courier_company_id,
+        name: cheapest.courier_name,
+        estimatedDeliveryDays: cheapest.estimated_delivery_days || null,
+        etd: cheapest.etd || null
+      }
+    };
+  } catch (error) {
+    const delhiveryConfigured =
+      env.DELHIVERY_API_TOKEN &&
+      env.DELHIVERY_RATE_API_URL &&
+      env.PICKUP_PINCODE;
+
+    if (!delhiveryConfigured) {
+      throw error;
     }
-  };
+
+    const rate = await getDelhiveryRate({
+      env,
+      deliveryPincode,
+      orderValue,
+      paymentMethod,
+      profile
+    });
+
+    return {
+      carrier: 'delhivery',
+      actualWeightGrams: profile.actualWeightGrams,
+      volumetricWeightGrams: profile.volumetricWeightGrams,
+      chargeableWeightGrams: profile.chargeableWeightGrams,
+      chargeableWeightKg: profile.chargeableWeightKg,
+      dimensions: profile.dimensions,
+      amount: Math.ceil(Number(rate.amount)),
+      courier: {
+        id: null,
+        name: 'Delhivery',
+        estimatedDeliveryDays: rate.estimatedDeliveryDays || null,
+        etd: rate.etd || null
+      }
+    };
+  }
 }
