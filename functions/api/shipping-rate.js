@@ -39,13 +39,14 @@ export async function onRequestPost(context) {
       validatedCart,
       deliveryPincode,
       orderValue: calculateSubtotal(validatedCart),
-      paymentMethod: 'prepaid'
+      paymentMethod: body.paymentMethod === 'cod' ? 'cod' : 'prepaid'
     });
 
     return json({
       success: true,
       shipping: quote.amount,
       carrier: quote.carrier,
+      estimateSource: quote.estimateSource,
       actualWeightGrams: quote.actualWeightGrams,
       volumetricWeightGrams: quote.volumetricWeightGrams,
       chargeableWeightGrams: quote.chargeableWeightGrams,

@@ -1,6 +1,5 @@
 import { validateCart, calculateSubtotal } from '../lib/catalog.js';
 import { getShippingQuote } from '../lib/shipping.js';
-import { createDelhiveryShipment } from '../lib/delhivery.js';
 import { createShiprocketShipment } from '../lib/shiprocket.js';
 
 function json(data, status = 200) {
@@ -19,22 +18,6 @@ function bytesToHex(bytes) {
     .join('');
 }
 
-function safeEqual(first, second) {
-  if (
-    typeof first !== 'string' ||
-    typeof second !== 'string' ||
-    first.length !== second.length
-  ) {
-    return false;
-  }
-
-  let difference = 0;
-  for (let index = 0; index < first.length; index += 1) {
-    difference |= first.charCodeAt(index) ^ second.charCodeAt(index);
-  }
-  return difference === 0;
-}
-
 async function createSignature(message, secret) {
   const encoder = new TextEncoder();
   const key = await crypto.subtle.importKey(
@@ -44,41 +27,20 @@ async function createSignature(message, secret) {
     false,
     ['sign']
   );
-  const signature = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    encoder.encode(message)
-  );
+  const signature = await crypto.subtle.sign('HMAC', key, encoder.encode(message));
   return bytesToHex(new Uint8Array(signature));
 }
 
-function validateCustomer(customer) {
-  const required = [
-    'name',
-    'phone',
-    'email',
-    'addressLine1',
-    'addressLine2',
-    'city',
-    'state',
-    'pincode'
-  ];
-
-  if (!customer || required.some((key) => !String(customer[key] || '').trim())) {
-    throw new Error('Missing customer delivery details.');
+function safeEqual(first, second) {
+  if (typeof first !== 'string' || typeof second !== 'string' || first.length !== second.length) {
+    return false;
   }
 
-  if (!/^[0-9]{10}$/.test(String(customer.phone))) {
-    throw new Error('Enter a valid 10-digit phone number.');
+  let difference = 0;
+  for (let index = 0; index < first.length; index += 1) {
+    difference |= first.charCodeAt(index) ^ second.charCodeAt(index);
   }
-
-  if (!/^[1-9][0-9]{5}$/.test(String(customer.pincode))) {
-    throw new Error('Enter a valid 6-digit PIN code.');
-  }
-
-  return Object.fromEntries(
-    Object.entries(customer).map(([key, value]) => [key, String(value || '').trim()])
-  );
+  return difference === 0;
 }
 
 export async function onRequestPost(context) {
@@ -95,14 +57,7 @@ export async function onRequestPost(context) {
     return json({ error: 'Invalid request body.' }, 400);
   }
 
-  const {
-    razorpay_order_id,
-    razorpay_payment_id,
-    razorpay_signature,
-    cart,
-    customer
-  } = body;
-
+  const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
   if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
     return json({ error: 'Missing payment verification fields.' }, 400);
   }
@@ -113,95 +68,59 @@ export async function onRequestPost(context) {
   );
 
   if (!safeEqual(expectedSignature, razorpay_signature)) {
-    return json(
-      { success: false, error: 'Payment signature verification failed.' },
-      400
-    );
+    return json({ success: false, error: 'Payment signature verification failed.' }, 400);
   }
 
-  let validatedCart;
-  let validatedCustomer;
-  try {
-    validatedCart = validateCart(cart);
-    validatedCustomer = validateCustomer(customer);
-  } catch (error) {
-    return json(
-      {
-        success: true,
-        payment_id: razorpay_payment_id,
-        order_id: razorpay_order_id,
-        shipmentCreated: false,
-        shipmentError: error.message
-      },
-      200
-    );
-  }
+  const result = {
+    success: true,
+    payment_id: razorpay_payment_id,
+    order_id: razorpay_order_id,
+    message: 'Payment verified.',
+    shipmentCreated: false,
+    carrier: null,
+    shipmentError: null
+  };
 
-  const subtotal = calculateSubtotal(validatedCart);
-  let quote;
   try {
-    quote = await getShippingQuote({
+    const customer = body.customer;
+    if (
+      !customer ||
+      !customer.name ||
+      !customer.addressLine1 ||
+      !customer.city ||
+      !customer.state ||
+      !customer.pincode ||
+      !customer.phone
+    ) {
+      throw new Error('Customer details are missing.');
+    }
+
+    const validatedCart = validateCart(body.cart);
+    const subtotal = calculateSubtotal(validatedCart);
+
+    const quote = await getShippingQuote({
       env,
       validatedCart,
-      deliveryPincode: validatedCustomer.pincode,
+      deliveryPincode: String(customer.pincode),
       orderValue: subtotal,
       paymentMethod: 'prepaid'
     });
-  } catch (error) {
-    console.error('Post-payment shipping quote failed:', error);
-    return json({
-      success: true,
-      payment_id: razorpay_payment_id,
-      order_id: razorpay_order_id,
-      shipmentCreated: false,
-      shipmentError: error.message || 'Shipment quote failed after payment.'
+
+    await createShiprocketShipment({
+      env,
+      customer,
+      validatedCart,
+      orderId: razorpay_order_id,
+      orderTotal: subtotal + quote.amount,
+      profile: quote
     });
+
+    result.shipmentCreated = true;
+    result.carrier = quote.courier?.name || 'Shiprocket';
+  } catch (error) {
+    console.error('Shipment creation error:', error);
+    result.shipmentError = error.message;
   }
 
-  const internalOrderId = `VF-${Date.now()}-${razorpay_payment_id.slice(-6)}`;
-  const orderTotal = subtotal + quote.amount;
-
-  try {
-    const shipment =
-      quote.carrier === 'delhivery'
-        ? await createDelhiveryShipment({
-            env,
-            customer: validatedCustomer,
-            validatedCart,
-            orderId: internalOrderId,
-            paymentId: razorpay_payment_id,
-            orderTotal,
-            profile: quote
-          })
-        : await createShiprocketShipment({
-            env,
-            customer: validatedCustomer,
-            validatedCart,
-            orderId: internalOrderId,
-            orderTotal,
-            profile: quote
-          });
-
-    return json({
-      success: true,
-      payment_id: razorpay_payment_id,
-      order_id: razorpay_order_id,
-      internalOrderId,
-      shipmentCreated: true,
-      carrier: quote.carrier,
-      shipment
-    });
-  } catch (error) {
-    console.error('Shipment creation failed after verified payment:', error);
-    return json({
-      success: true,
-      payment_id: razorpay_payment_id,
-      order_id: razorpay_order_id,
-      internalOrderId,
-      shipmentCreated: false,
-      carrier: quote.carrier,
-      shipmentError:
-        error.message || 'Shipment creation failed. Create it manually in the courier dashboard.'
-    });
-  }
+  return json(result);
 }

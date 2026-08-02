@@ -38,28 +38,32 @@ export async function onRequestPost(context) {
   }
 
   const subtotal = calculateSubtotal(validatedCart);
-  let shippingQuote;
 
+  let quote;
   try {
-    shippingQuote = await getShippingQuote({
+    quote = await getShippingQuote({
       env,
       validatedCart,
       deliveryPincode: pincode,
       orderValue: subtotal,
-      paymentMethod: 'prepaid'
+      paymentMethod: body.paymentMethod === 'cod' ? 'cod' : 'prepaid'
     });
   } catch (error) {
-    return json({ error: error.message || 'Unable to calculate shipping.' }, 400);
+    console.error('Create-order shipping error:', error);
+    return json(
+      { error: error.message || 'Unable to calculate delivery charges.' },
+      400
+    );
   }
 
-  const shipping = shippingQuote.amount;
+  const shipping = quote.amount;
   const total = subtotal + shipping;
   const amount = Math.round(total * 100);
   const receipt = `vf_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
   const credentials = btoa(`${env.RAZORPAY_KEY_ID}:${env.RAZORPAY_KEY_SECRET}`);
 
   try {
-    const razorpayResponse = await fetch('https://api.razorpay.com/v1/orders', {
+    const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
       headers: {
         Authorization: `Basic ${credentials}`,
@@ -73,36 +77,28 @@ export async function onRequestPost(context) {
           store: 'Vaishali Foods',
           subtotal: String(subtotal),
           shipping: String(shipping),
-          carrier: shippingQuote.carrier,
-          actual_weight_g: String(shippingQuote.actualWeightGrams),
-          chargeable_weight_g: String(shippingQuote.chargeableWeightGrams)
+          carrier: quote.courier?.name || '',
+          pincode
         }
       })
     });
-    const razorpayData = await razorpayResponse.json().catch(() => ({}));
 
-    if (!razorpayResponse.ok) {
-      console.error('Razorpay order error:', razorpayData);
-      return json(
-        {
-          error:
-            razorpayResponse.status === 401
-              ? 'Razorpay authentication failed.'
-              : 'Unable to create the payment order.'
-        },
-        razorpayResponse.status === 401 ? 401 : 500
-      );
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      console.error('Razorpay order error:', data);
+      return json({ error: 'Unable to create the payment order.' }, 500);
     }
 
     return json({
-      order_id: razorpayData.id,
-      amount: razorpayData.amount,
-      currency: razorpayData.currency,
+      order_id: data.id,
+      amount: data.amount,
+      currency: data.currency,
       key_id: env.RAZORPAY_KEY_ID,
       subtotal,
       shipping,
       total,
-      shippingQuote
+      carrier: quote.courier
     });
   } catch (error) {
     console.error('Create-order exception:', error);

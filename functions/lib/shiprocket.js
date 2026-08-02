@@ -1,10 +1,31 @@
 let cachedToken = null;
 let tokenExpiresAt = 0;
+let cachedTokenKey = null;
+
+function parseJsonSafely(text) {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+async function readJsonResponse(response) {
+  const text = await response.text();
+  return {
+    text,
+    data: parseJsonSafely(text)
+  };
+}
 
 export async function getShiprocketToken(env) {
   const now = Date.now();
 
-  if (cachedToken && now < tokenExpiresAt) {
+  const tokenKey = env?.SHIPROCKET_EMAIL && env?.SHIPROCKET_PASSWORD
+    ? `${env.SHIPROCKET_EMAIL}:${env.SHIPROCKET_PASSWORD}`
+    : null;
+
+  if (cachedToken && tokenKey && cachedTokenKey === tokenKey && now < tokenExpiresAt) {
     return cachedToken;
   }
 
@@ -23,15 +44,23 @@ export async function getShiprocketToken(env) {
       })
     }
   );
-  const data = await response.json().catch(() => ({}));
+  const { text, data } = await readJsonResponse(response);
 
-  if (!response.ok || !data.token) {
-    console.error('Shiprocket login error:', data);
-    throw new Error('Unable to authenticate with Shiprocket.');
+  if (!response.ok || !data?.token) {
+    console.error('Shiprocket login error:', {
+      status: response.status,
+      body: text
+    });
+    throw new Error(
+      data?.message ||
+        `Unable to authenticate with Shiprocket (${response.status}).`
+    );
   }
 
   cachedToken = data.token;
-  tokenExpiresAt = now + 9 * 24 * 60 * 60 * 1000;
+  cachedTokenKey = tokenKey;
+  tokenExpiresAt = now + 23 * 60 * 60 * 1000;
+
   return cachedToken;
 }
 
@@ -48,37 +77,57 @@ export async function getShippingRates({
   }
 
   const token = await getShiprocketToken(env);
+
   const params = new URLSearchParams({
-    pickup_postcode: env.SHIPROCKET_PICKUP_PIN,
-    delivery_postcode: deliveryPincode,
-    weight: String(weight),
+    pickup_postcode: String(env.SHIPROCKET_PICKUP_PIN),
+    delivery_postcode: String(deliveryPincode),
+    weight: String(Number(weight) || 0),
     cod: cod ? '1' : '0',
-    length: String(dimensions.lengthCm),
-    breadth: String(dimensions.breadthCm),
-    height: String(dimensions.heightCm)
+    length: String(Number(dimensions.lengthCm) || 0),
+    breadth: String(Number(dimensions.breadthCm) || 0),
+    height: String(Number(dimensions.heightCm) || 0)
   });
 
   if (Number.isFinite(Number(declaredValue))) {
     params.set('declared_value', String(Math.round(Number(declaredValue))));
   }
 
+  params.set('mode', 'Surface');
+
   const response = await fetch(
-    `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?${params}`,
+    `https://apiv2.shiprocket.in/v1/external/courier/serviceability?${params.toString()}`,
     {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     }
   );
-  const data = await response.json().catch(() => ({}));
+  const { text, data } = await readJsonResponse(response);
 
-  if (!response.ok) {
-    console.error('Shiprocket serviceability error:', data);
-    throw new Error(data?.message || 'Unable to calculate Shiprocket shipping.');
+  if (response.status === 401) {
+    cachedToken = null;
+    cachedTokenKey = null;
+    tokenExpiresAt = 0;
   }
 
-  const couriers = data?.data?.available_courier_companies;
+  if (!response.ok) {
+    console.error('Shiprocket serviceability error:', {
+      status: response.status,
+      body: text
+    });
+    throw new Error(
+      data?.message ||
+        `Unable to calculate Shiprocket shipping (${response.status}).`
+    );
+  }
+
+  const couriers =
+    data?.data?.available_courier_companies ||
+    data?.data?.available_counter_companies ||
+    [];
+
   if (!Array.isArray(couriers) || couriers.length === 0) {
     throw new Error('No courier service is available for this PIN code.');
   }
@@ -96,9 +145,7 @@ export function selectCheapestCourier(couriers) {
     throw new Error('No valid courier rate was found.');
   }
 
-  // Use the primary serviceability option returned by Shiprocket so the site
-  // mirrors the quote that Shiprocket presents to the merchant.
-  return validCouriers[0];
+  return validCouriers.sort((a, b) => Number(a.rate) - Number(b.rate))[0];
 }
 
 export async function createShiprocketShipment({
@@ -114,6 +161,7 @@ export async function createShiprocketShipment({
   }
 
   const token = await getShiprocketToken(env);
+
   const payload = {
     order_id: orderId,
     order_date: new Date().toISOString().slice(0, 10),
@@ -132,7 +180,7 @@ export async function createShiprocketShipment({
     billing_phone: customer.phone,
     shipping_is_billing: true,
     order_items: validatedCart.map((item) => ({
-      name: `${item.name} - ${item.weight}`,
+      name: `${item.name} - ${item.weight || ''}`,
       sku: item.variantId,
       units: item.qty,
       selling_price: item.price,
@@ -142,7 +190,7 @@ export async function createShiprocketShipment({
     })),
     payment_method: 'Prepaid',
     sub_total: orderTotal,
-    weight: profile.actualWeightGrams / 1000,
+    weight: profile.actualWeightKg,
     length: profile.dimensions.lengthCm,
     breadth: profile.dimensions.breadthCm,
     height: profile.dimensions.heightCm
@@ -159,11 +207,23 @@ export async function createShiprocketShipment({
       body: JSON.stringify(payload)
     }
   );
-  const data = await response.json().catch(() => ({}));
+  const { text, data } = await readJsonResponse(response);
+
+  if (response.status === 401) {
+    cachedToken = null;
+    cachedTokenKey = null;
+    tokenExpiresAt = 0;
+  }
 
   if (!response.ok) {
-    console.error('Shiprocket shipment error:', data);
-    throw new Error(data?.message || 'Shiprocket shipment creation failed.');
+    console.error('Shiprocket shipment error:', {
+      status: response.status,
+      body: text
+    });
+    throw new Error(
+      data?.message ||
+        `Shiprocket shipment creation failed (${response.status}).`
+    );
   }
 
   return data;

@@ -1,8 +1,17 @@
-// Route: functions/api/create-order.js -> POST /api/create-order
 import { validateCart, calculateSubtotal } from '../lib/catalog.js';
-import { json, methodGuard } from '../lib/http.js';
+import { getShippingQuote } from '../lib/shipping.js';
 
-async function handleCreateOrder(context) {
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store'
+    }
+  });
+}
+
+export async function onRequestPost(context) {
   const { request, env } = context;
 
   if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
@@ -29,15 +38,25 @@ async function handleCreateOrder(context) {
   }
 
   const subtotal = calculateSubtotal(validatedCart);
-  // NOTE: shipping is still hard-coded to 0 here, unchanged from before.
-  // Now that shipping-rate returns multiple courier options with different
-  // prices, this endpoint will need to receive the *selected* courier's
-  // amount from the frontend (and re-verify it) before it can charge the
-  // real total. Flagging this since it's now visibly inconsistent with the
-  // new multi-courier flow, but leaving the logic as-is since it's outside
-  // the reported bug and I don't have the checkout page to wire it up
-  // safely — happy to do that next if you share it.
-  const shipping = 0;
+
+  let quote;
+  try {
+    quote = await getShippingQuote({
+      env,
+      validatedCart,
+      deliveryPincode: pincode,
+      orderValue: subtotal,
+      paymentMethod: body.paymentMethod === 'cod' ? 'cod' : 'prepaid'
+    });
+  } catch (error) {
+    console.error('Create-order shipping error:', error);
+    return json(
+      { error: error.message || 'Unable to calculate delivery charges.' },
+      400
+    );
+  }
+
+  const shipping = quote.amount;
   const total = subtotal + shipping;
   const amount = Math.round(total * 100);
   const receipt = `vf_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
@@ -58,6 +77,7 @@ async function handleCreateOrder(context) {
           store: 'Vaishali Foods',
           subtotal: String(subtotal),
           shipping: String(shipping),
+          carrier: quote.courier?.name || '',
           pincode
         }
       })
@@ -77,12 +97,11 @@ async function handleCreateOrder(context) {
       key_id: env.RAZORPAY_KEY_ID,
       subtotal,
       shipping,
-      total
+      total,
+      carrier: quote.courier
     });
   } catch (error) {
     console.error('Create-order exception:', error);
     return json({ error: 'Unable to connect to the payment service.' }, 500);
   }
 }
-
-export const onRequest = methodGuard(['POST'], handleCreateOrder);

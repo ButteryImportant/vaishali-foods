@@ -1,5 +1,16 @@
-// Route: functions/api/verify-payment.js -> POST /api/verify-payment
-import { json, methodGuard } from '../lib/http.js';
+import { validateCart, calculateSubtotal } from '../lib/catalog.js';
+import { getShippingQuote } from '../lib/shipping.js';
+import { createShiprocketShipment } from '../lib/shiprocket.js';
+
+function json(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-store'
+    }
+  });
+}
 
 function bytesToHex(bytes) {
   return Array.from(bytes)
@@ -32,7 +43,7 @@ function safeEqual(first, second) {
   return difference === 0;
 }
 
-async function handleVerifyPayment(context) {
+export async function onRequestPost(context) {
   const { request, env } = context;
 
   if (!env.RAZORPAY_KEY_SECRET) {
@@ -60,12 +71,56 @@ async function handleVerifyPayment(context) {
     return json({ success: false, error: 'Payment signature verification failed.' }, 400);
   }
 
-  return json({
+  const result = {
     success: true,
     payment_id: razorpay_payment_id,
     order_id: razorpay_order_id,
-    message: 'Payment verified.'
-  });
-}
+    message: 'Payment verified.',
+    shipmentCreated: false,
+    carrier: null,
+    shipmentError: null
+  };
 
-export const onRequest = methodGuard(['POST'], handleVerifyPayment);
+  try {
+    const customer = body.customer;
+    if (
+      !customer ||
+      !customer.name ||
+      !customer.addressLine1 ||
+      !customer.city ||
+      !customer.state ||
+      !customer.pincode ||
+      !customer.phone
+    ) {
+      throw new Error('Customer details are missing.');
+    }
+
+    const validatedCart = validateCart(body.cart);
+    const subtotal = calculateSubtotal(validatedCart);
+
+    const quote = await getShippingQuote({
+      env,
+      validatedCart,
+      deliveryPincode: String(customer.pincode),
+      orderValue: subtotal,
+      paymentMethod: 'prepaid'
+    });
+
+    await createShiprocketShipment({
+      env,
+      customer,
+      validatedCart,
+      orderId: razorpay_order_id,
+      orderTotal: subtotal + quote.amount,
+      profile: quote
+    });
+
+    result.shipmentCreated = true;
+    result.carrier = quote.courier?.name || 'Shiprocket';
+  } catch (error) {
+    console.error('Shipment creation error:', error);
+    result.shipmentError = error.message;
+  }
+
+  return json(result);
+}
