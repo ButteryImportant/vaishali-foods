@@ -96,11 +96,9 @@ export function selectCheapestCourier(couriers) {
     throw new Error('No valid courier rate was found.');
   }
 
-  // Shiprocket's serviceability API can return multiple courier options.
-  // The checkout UI should reflect the primary serviceability option returned
-  // by Shiprocket rather than the absolute cheapest rate, which can differ from
-  // the quote shown in Shiprocket's own panel.
-  return validCouriers[0];
+  return validCouriers.reduce((cheapest, courier) =>
+    Number(courier.rate) < Number(cheapest.rate) ? courier : cheapest
+  );
 }
 
 export async function createShiprocketShipment({
