@@ -49,22 +49,25 @@ export async function getShippingRates({
 
   const token = await getShiprocketToken(env);
   const params = new URLSearchParams({
-    pickup_postcode: env.SHIPROCKET_PICKUP_PIN,
-    delivery_postcode: deliveryPincode,
-    weight: String(weight),
+    pickup_postcode: String(env.SHIPROCKET_PICKUP_PIN),
+    delivery_postcode: String(deliveryPincode),
+    weight: String(Number(weight) || 0),
     cod: cod ? '1' : '0',
-    length: String(dimensions.lengthCm),
-    breadth: String(dimensions.breadthCm),
-    height: String(dimensions.heightCm)
+    length: String(Number(dimensions.lengthCm) || 0),
+    breadth: String(Number(dimensions.breadthCm) || 0),
+    height: String(Number(dimensions.heightCm) || 0)
   });
 
   if (Number.isFinite(Number(declaredValue))) {
     params.set('declared_value', String(Math.round(Number(declaredValue))));
   }
 
+  params.set('mode', 'Surface');
+
   const response = await fetch(
     `https://apiv2.shiprocket.in/v1/external/courier/serviceability/?${params}`,
     {
+      method: 'GET',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
