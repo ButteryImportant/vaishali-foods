@@ -31,9 +31,30 @@ h2{font-size:clamp(2rem,5vw,3.4rem)}
 .brand img{width:54px;height:54px;object-fit:contain}
 .brand-copy span{display:block;font-family:Georgia,serif;font-size:1.08rem}
 .brand-copy small{font-size:.67rem;letter-spacing:.1em;color:var(--brown-soft)}
-.nav-links{display:flex;align-items:center;gap:24px;font-size:.92rem;font-weight:700}
-.cart-btn{position:relative}
+.nav-links{display:flex;align-items:center;gap:clamp(12px, 1.8vw, 22px);font-size:.92rem;font-weight:700}
+.btn-auth{background:var(--white);color:var(--brown);border:1.5px solid rgba(74,41,31,.2);padding:10px 18px;font-size:.88rem;font-weight:700;border-radius:999px;display:inline-flex;align-items:center;gap:7px;text-decoration:none;cursor:pointer;box-shadow:0 4px 12px rgba(74,41,31,.05);transition:all .2s ease;white-space:nowrap}
+.btn-auth:hover{background:var(--brown);color:var(--cream);border-color:var(--brown);transform:translateY(-2px);box-shadow:0 8px 20px rgba(74,41,31,.14)}
+.btn-auth svg{width:16px;height:16px;stroke:currentColor;transition:transform .2s ease}
+.btn-auth:hover svg{transform:scale(1.1)}
+.cart-btn{position:relative;padding:10px 18px;font-size:.88rem}
 .cart-count{background:var(--orange);color:white;border-radius:50%;min-width:21px;height:21px;padding:0 5px;display:inline-grid;place-items:center;font-size:.73rem}
+.user-menu{display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1.5px solid rgba(74,41,31,.2);border-radius:999px;padding:4px 6px 4px 5px;box-shadow:0 4px 12px rgba(74,41,31,.05);transition:all .2s ease}
+.user-menu:hover{border-color:rgba(74,41,31,.35);box-shadow:0 6px 16px rgba(74,41,31,.1)}
+.user-pill{display:inline-flex;align-items:center;gap:8px;text-decoration:none;color:var(--brown);padding:2px 6px 2px 2px}
+.user-avatar{width:28px;height:28px;border-radius:50%;background:var(--brown);color:var(--cream);display:grid;place-items:center;font-size:.72rem;font-weight:800;letter-spacing:.02em}
+.user-greeting{font-size:.85rem;font-weight:700;color:var(--brown);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-signout{border:none;background:rgba(74,41,31,.06);color:var(--brown-soft);width:28px;height:28px;border-radius:50%;display:grid;place-items:center;cursor:pointer;transition:all .2s ease;padding:0}
+.btn-signout:hover{background:var(--red);color:#fff;transform:scale(1.05)}
+.mobile-nav-actions{padding:16px 20px 20px;background:rgba(74,41,31,.03);border-top:1px solid rgba(74,41,31,.08)}
+.mobile-auth-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;padding:12px 20px;font-size:.95rem}
+.mobile-user-profile{display:flex;flex-direction:column;gap:12px;background:var(--white);border:1px solid rgba(74,41,31,.12);border-radius:16px;padding:14px 16px}
+.mobile-user-info{display:flex;align-items:center;gap:12px}
+.mobile-user-info .user-avatar{width:38px;height:38px;font-size:.9rem}
+.mobile-user-copy{display:flex;flex-direction:column;min-width:0}
+.mobile-user-copy strong{font-size:.95rem;color:var(--brown);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobile-user-copy span{font-size:.8rem;color:var(--brown-soft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mobile-signout-btn{width:100%;padding:10px;font-size:.88rem;border-radius:999px;border:1px solid rgba(74,41,31,.2);background:transparent;cursor:pointer;font-weight:700;color:var(--brown)}
+.mobile-signout-btn:hover{background:var(--brown);color:var(--cream)}
 .hero{overflow:hidden;padding:70px 0 82px;background:radial-gradient(circle at 85% 18%,rgba(240,106,34,.18),transparent 30%),linear-gradient(135deg,#fff8eb,#fae8c4)}
 .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;align-items:center;gap:58px}
 .hero h1{font-size:clamp(3rem,7vw,6.1rem);letter-spacing:-.045em;max-width:760px}

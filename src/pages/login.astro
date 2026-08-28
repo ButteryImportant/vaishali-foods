@@ -1,0 +1,969 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Sign In / Sign Up | Vaishali Foods"
+  description="Sign in or create your Vaishali Foods account to track orders, save delivery addresses, and enjoy pure traditional sweets."
+  showCart={true}
+>
+  <section class="auth-section">
+    <div class="container auth-container">
+      <div class="auth-layout">
+        <!-- Auth Form Card -->
+        <div class="auth-card" id="auth-main-card">
+          <div class="auth-header">
+            <span class="eyebrow">Welcome to Vaishali Foods</span>
+            <h1 id="auth-title">Access Your Account</h1>
+            <p id="auth-subtitle">
+              Sign in to manage your orders, track shipments, and experience pure traditional taste.
+            </p>
+          </div>
+
+          <!-- Already Logged In Banner (hidden by default) -->
+          <div class="logged-in-box" id="logged-in-box" style="display:none;">
+            <div class="logged-in-avatar" id="logged-in-avatar">VF</div>
+            <div class="logged-in-info">
+              <strong id="logged-in-name">User Name</strong>
+              <span id="logged-in-email">user@example.com</span>
+            </div>
+            <div class="logged-in-actions">
+              <a href="/shop" class="btn btn-primary">Start Shopping</a>
+              <button type="button" class="btn btn-secondary" id="logged-in-signout">Sign Out</button>
+            </div>
+          </div>
+
+          <!-- Tab Navigation -->
+          <div class="auth-tabs" id="auth-tabs-bar" role="tablist">
+            <button
+              type="button"
+              class="auth-tab active"
+              id="tab-login"
+              role="tab"
+              aria-selected="true"
+              aria-controls="panel-login"
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              class="auth-tab"
+              id="tab-signup"
+              role="tab"
+              aria-selected="false"
+              aria-controls="panel-signup"
+            >
+              Create Account
+            </button>
+          </div>
+
+          <!-- Sign In Form Panel -->
+          <div class="auth-panel" id="panel-login" role="tabpanel">
+            <form class="auth-form" id="login-form">
+              <div class="form-group">
+                <label for="login-email">Email Address</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  <input
+                    type="email"
+                    id="login-email"
+                    name="email"
+                    placeholder="name@example.com"
+                    required
+                    autocomplete="username email"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <div class="label-row">
+                  <label for="login-password">Password</label>
+                </div>
+                <div class="input-wrapper">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <input
+                    type="password"
+                    id="login-password"
+                    name="password"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+                  />
+                  <button type="button" class="password-toggle" aria-label="Toggle password visibility" data-target="login-password">
+                    <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed" style="display:none;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="remember" id="remember-me" checked />
+                  <span>Remember my session</span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="login-submit-btn">
+                <span class="btn-text">Sign In</span>
+                <span class="btn-spinner" style="display:none;">
+                  <svg class="spinner-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3"></circle></svg>
+                </span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- Sign Up Form Panel -->
+          <div class="auth-panel" id="panel-signup" role="tabpanel" style="display: none;">
+            <form class="auth-form" id="signup-form">
+              <div class="form-group">
+                <label for="signup-name">Full Name</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                  </svg>
+                  <input
+                    type="text"
+                    id="signup-name"
+                    name="fullname"
+                    placeholder="e.g. Ramesh Kulkarni"
+                    required
+                    autocomplete="name"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="signup-email">Email Address</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                    <polyline points="22,6 12,13 2,6"></polyline>
+                  </svg>
+                  <input
+                    type="email"
+                    id="signup-email"
+                    name="email"
+                    placeholder="name@example.com"
+                    required
+                    autocomplete="email"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="signup-phone">Mobile Phone (for delivery & SMS tracking)</label>
+                <div class="input-wrapper">
+                  <span class="input-prefix">+91</span>
+                  <input
+                    type="tel"
+                    id="signup-phone"
+                    name="phone"
+                    placeholder="98765 43210"
+                    pattern="[0-9]{10}"
+                    required
+                    autocomplete="tel"
+                  />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="signup-password">Create Password</label>
+                <div class="input-wrapper">
+                  <svg class="input-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                  <input
+                    type="password"
+                    id="signup-password"
+                    name="password"
+                    placeholder="At least 6 characters"
+                    minlength="6"
+                    required
+                    autocomplete="new-password"
+                  />
+                  <button type="button" class="password-toggle" aria-label="Toggle password visibility" data-target="signup-password">
+                    <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                    <svg class="eye-closed" style="display:none;" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                      <line x1="1" y1="1" x2="23" y2="23"></line>
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <div class="form-options">
+                <label class="checkbox-label">
+                  <input type="checkbox" name="terms" required checked />
+                  <span>I agree to the <a href="/terms" target="_blank">Terms</a> and <a href="/privacy-policy" target="_blank">Privacy Policy</a></span>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="signup-submit-btn">
+                <span class="btn-text">Create Vaishali Foods Account</span>
+                <span class="btn-spinner" style="display:none;">
+                  <svg class="spinner-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="3"></circle></svg>
+                </span>
+                <svg class="btn-arrow" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </form>
+          </div>
+
+          <!-- Status / Feedback Toast Box -->
+          <div id="auth-status" class="auth-status-box" style="display:none;"></div>
+
+          <div class="auth-footer-note">
+            <span>Looking to browse our delicacies?</span>
+            <a href="/shop" class="back-link">Explore Shop →</a>
+          </div>
+        </div>
+
+        <!-- Benefits & Brand Side Card -->
+        <div class="auth-benefits-card">
+          <div class="benefits-badge">Member Privileges</div>
+          <h2>Why create an account with Vaishali Foods?</h2>
+          <p>Experience the authentic taste of tradition with enhanced conveniences tailored for our loyal patrons.</p>
+
+          <div class="benefits-list">
+            <div class="benefit-item">
+              <div class="benefit-icon">📦</div>
+              <div>
+                <strong>Express One-Click Checkout</strong>
+                <p>Save default delivery addresses and speed through orders effortlessly.</p>
+              </div>
+            </div>
+
+            <div class="benefit-item">
+              <div class="benefit-icon">🚚</div>
+              <div>
+                <strong>Real-Time Shipment Tracking</strong>
+                <p>Direct live tracking integration with Delhivery and Shiprocket couriers.</p>
+              </div>
+            </div>
+
+            <div class="benefit-item">
+              <div class="benefit-icon">✨</div>
+              <div>
+                <strong>Handmade Fresh on Demand</strong>
+                <p>Pure Cow Ghee, no artificial preservatives, made in small hygienic batches.</p>
+              </div>
+            </div>
+
+            <div class="benefit-item">
+              <div class="benefit-icon">🎁</div>
+              <div>
+                <strong>Exclusive Festival Specials</strong>
+                <p>Early access to seasonal sweets, gift boxes, and festive discounts.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-box">
+            <small>Need instant support?</small>
+            <a href="https://wa.me/919730487916" target="_blank" rel="noreferrer" class="whatsapp-badge">
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"></path>
+              </svg>
+              Chat on WhatsApp: +91 97304 87916
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .auth-section {
+    padding: 56px 0 84px;
+    min-height: calc(100vh - 200px);
+    background: radial-gradient(circle at 15% 20%, rgba(240, 106, 34, 0.08), transparent 40%),
+                radial-gradient(circle at 85% 80%, rgba(189, 44, 52, 0.06), transparent 40%),
+                var(--cream);
+  }
+
+  .auth-layout {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 40px;
+    align-items: stretch;
+    max-width: 1040px;
+    margin: 0 auto;
+  }
+
+  .auth-card {
+    background: var(--white);
+    border: 1px solid rgba(74, 41, 31, 0.1);
+    border-radius: 28px;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .auth-header {
+    margin-bottom: 24px;
+  }
+
+  .auth-header h1 {
+    font-size: clamp(1.8rem, 3.5vw, 2.4rem);
+    color: var(--brown);
+    margin: 6px 0 10px;
+  }
+
+  .auth-header p {
+    color: var(--brown-soft);
+    font-size: 0.96rem;
+    margin: 0;
+    line-height: 1.5;
+  }
+
+  .logged-in-box {
+    background: #f7f0e6;
+    border: 1px solid rgba(74, 41, 31, 0.15);
+    border-radius: 20px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .logged-in-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--brown);
+    color: var(--cream);
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 1.3rem;
+  }
+
+  .logged-in-info strong {
+    display: block;
+    font-size: 1.15rem;
+    color: var(--brown);
+  }
+
+  .logged-in-info span {
+    font-size: 0.9rem;
+    color: var(--brown-soft);
+  }
+
+  .logged-in-actions {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .auth-tabs {
+    display: flex;
+    background: rgba(74, 41, 31, 0.06);
+    padding: 4px;
+    border-radius: 999px;
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  .auth-tab {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 10px 18px;
+    border-radius: 999px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: var(--brown-soft);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .auth-tab.active {
+    background: var(--white);
+    color: var(--brown);
+    box-shadow: 0 4px 12px rgba(74, 41, 31, 0.1);
+  }
+
+  .auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .form-group label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--brown);
+  }
+
+  .label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .input-icon {
+    position: absolute;
+    left: 14px;
+    color: var(--brown-soft);
+    pointer-events: none;
+  }
+
+  .input-prefix {
+    position: absolute;
+    left: 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: var(--brown-soft);
+    pointer-events: none;
+  }
+
+  .input-wrapper input {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1.5px solid rgba(74, 41, 31, 0.18);
+    border-radius: 12px;
+    background: #fffdfa;
+    color: var(--brown);
+    font-size: 0.92rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  #signup-phone {
+    padding-left: 50px;
+  }
+
+  .input-wrapper input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 4px rgba(240, 106, 34, 0.15);
+    background: #fff;
+  }
+
+  .password-toggle {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    color: var(--brown-soft);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+
+  .password-toggle:hover {
+    color: var(--brown);
+  }
+
+  .form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.86rem;
+    color: var(--brown-soft);
+  }
+
+  .checkbox-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-label input[type="checkbox"] {
+    accent-color: var(--red);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+  }
+
+  .checkbox-label a {
+    color: var(--red);
+    font-weight: 700;
+  }
+
+  .btn-block {
+    width: 100%;
+    margin-top: 6px;
+    padding: 14px;
+    font-size: 1rem;
+    position: relative;
+  }
+
+  .btn-spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .spinner-svg {
+    width: 20px;
+    height: 20px;
+    animation: spin 0.8s linear infinite;
+  }
+
+  .spinner-svg circle {
+    stroke-dasharray: 45;
+    stroke-dashoffset: 20;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .auth-status-box {
+    margin-top: 18px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    animation: fadeIn 0.3s ease;
+  }
+
+  .auth-status-box.success {
+    background: #eef7ee;
+    border: 1px solid #bfe3bf;
+    color: #1e5a22;
+  }
+
+  .auth-status-box.error {
+    background: #fdf0f0;
+    border: 1px solid #f8c8c8;
+    color: #a82020;
+  }
+
+  .auth-footer-note {
+    margin-top: auto;
+    padding-top: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(74, 41, 31, 0.08);
+    font-size: 0.88rem;
+    color: var(--brown-soft);
+  }
+
+  .back-link {
+    color: var(--brown);
+    font-weight: 700;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--red);
+  }
+
+  /* Benefits Side Card */
+  .auth-benefits-card {
+    background: linear-gradient(145deg, #4a291f, #331911);
+    color: var(--cream);
+    border-radius: 28px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-benefits-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(240, 106, 34, 0.22), transparent 70%);
+    pointer-events: none;
+  }
+
+  .benefits-badge {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #ffd299;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .auth-benefits-card h2 {
+    font-size: 1.85rem;
+    color: #fff8eb;
+    margin-bottom: 12px;
+    line-height: 1.2;
+  }
+
+  .auth-benefits-card > p {
+    color: #e0cec3;
+    font-size: 0.94rem;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+
+  .benefits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 32px;
+  }
+
+  .benefit-item {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+
+  .benefit-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    background: rgba(255, 255, 255, 0.08);
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  .benefit-item strong {
+    display: block;
+    color: #fffdfa;
+    font-size: 0.96rem;
+    margin-bottom: 3px;
+  }
+
+  .benefit-item p {
+    margin: 0;
+    color: #cfbcaf;
+    font-size: 0.84rem;
+    line-height: 1.45;
+  }
+
+  .support-box {
+    margin-top: auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .support-box small {
+    display: block;
+    color: #c4b0a4;
+    font-size: 0.78rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .whatsapp-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25d366;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .whatsapp-badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(37, 211, 102, 0.35);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 880px) {
+    .auth-layout {
+      grid-template-columns: 1fr;
+      gap: 28px;
+    }
+    .auth-card {
+      padding: 30px 22px;
+    }
+    .auth-benefits-card {
+      padding: 30px 22px;
+    }
+  }
+</style>
+
+<script>
+  import {
+    signUpUser,
+    signInUser,
+    signOutUser,
+    getCurrentSession,
+    getUserProfile,
+  } from '../lib/supabase.js';
+
+  const tabLogin = document.getElementById('tab-login');
+  const tabSignup = document.getElementById('tab-signup');
+  const panelLogin = document.getElementById('panel-login');
+  const panelSignup = document.getElementById('panel-signup');
+  const authTitle = document.getElementById('auth-title');
+  const authSubtitle = document.getElementById('auth-subtitle');
+  const statusBox = document.getElementById('auth-status');
+  const authTabsBar = document.getElementById('auth-tabs-bar');
+  const loggedInBox = document.getElementById('logged-in-box');
+  const loggedInName = document.getElementById('logged-in-name');
+  const loggedInEmail = document.getElementById('logged-in-email');
+  const loggedInAvatar = document.getElementById('logged-in-avatar');
+  const loggedInSignout = document.getElementById('logged-in-signout');
+
+  const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
+  const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
+  const loginBtn = document.getElementById('login-submit-btn');
+  const signupBtn = document.getElementById('signup-submit-btn');
+
+  function setButtonLoading(btn: HTMLElement | null, isLoading: boolean, text?: string) {
+    if (!btn) return;
+    const btnText = btn.querySelector('.btn-text');
+    const btnSpinner = btn.querySelector('.btn-spinner') as HTMLElement | null;
+    const btnArrow = btn.querySelector('.btn-arrow') as HTMLElement | null;
+
+    if (isLoading) {
+      btn.setAttribute('disabled', 'true');
+      if (btnText && text) btnText.textContent = text;
+      if (btnSpinner) btnSpinner.style.display = 'inline-flex';
+      if (btnArrow) btnArrow.style.display = 'none';
+    } else {
+      btn.removeAttribute('disabled');
+      if (btnText && text) btnText.textContent = text;
+      if (btnSpinner) btnSpinner.style.display = 'none';
+      if (btnArrow) btnArrow.style.display = 'inline-flex';
+    }
+  }
+
+  function showStatus(message: string, isError: boolean = false) {
+    if (!statusBox) return;
+    statusBox.className = `auth-status-box ${isError ? 'error' : 'success'}`;
+    statusBox.innerHTML = message;
+    statusBox.style.display = 'block';
+  }
+
+  function hideStatus() {
+    if (statusBox) statusBox.style.display = 'none';
+  }
+
+  function switchTab(isSignup: boolean) {
+    hideStatus();
+    if (isSignup) {
+      tabSignup?.classList.add('active');
+      tabLogin?.classList.remove('active');
+      tabSignup?.setAttribute('aria-selected', 'true');
+      tabLogin?.setAttribute('aria-selected', 'false');
+      if (panelSignup) panelSignup.style.display = 'block';
+      if (panelLogin) panelLogin.style.display = 'none';
+      if (authTitle) authTitle.textContent = 'Create New Account';
+      if (authSubtitle) authSubtitle.textContent = 'Join Vaishali Foods to track deliveries and enjoy pure artisanal sweets.';
+    } else {
+      tabLogin?.classList.add('active');
+      tabSignup?.classList.remove('active');
+      tabLogin?.setAttribute('aria-selected', 'true');
+      tabSignup?.setAttribute('aria-selected', 'false');
+      if (panelLogin) panelLogin.style.display = 'block';
+      if (panelSignup) panelSignup.style.display = 'none';
+      if (authTitle) authTitle.textContent = 'Access Your Account';
+      if (authSubtitle) authSubtitle.textContent = 'Sign in to manage your orders, track shipments, and experience pure traditional taste.';
+    }
+  }
+
+  tabLogin?.addEventListener('click', () => switchTab(false));
+  tabSignup?.addEventListener('click', () => switchTab(true));
+
+  if (window.location.hash === '#signup') {
+    switchTab(true);
+  }
+
+  // Password visibility togglers
+  document.querySelectorAll('.password-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      if (!targetId) return;
+      const input = document.getElementById(targetId) as HTMLInputElement | null;
+      const openIcon = btn.querySelector('.eye-open') as HTMLElement | null;
+      const closedIcon = btn.querySelector('.eye-closed') as HTMLElement | null;
+
+      if (input && input.type === 'password') {
+        input.type = 'text';
+        if (openIcon) openIcon.style.display = 'none';
+        if (closedIcon) closedIcon.style.display = 'block';
+      } else if (input) {
+        input.type = 'password';
+        if (openIcon) openIcon.style.display = 'block';
+        if (closedIcon) closedIcon.style.display = 'none';
+      }
+    });
+  });
+
+  // Check if already authenticated on mount
+  async function checkExistingAuth() {
+    try {
+      const session = await getCurrentSession();
+      if (session?.user) {
+        const profile = await getUserProfile(session.user.id);
+        const name = profile?.full_name || session.user.user_metadata?.full_name || 'Valued Member';
+        const email = session.user.email || '';
+        const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'VF';
+
+        if (loggedInName) loggedInName.textContent = name;
+        if (loggedInEmail) loggedInEmail.textContent = email;
+        if (loggedInAvatar) loggedInAvatar.textContent = initials;
+        if (loggedInBox) loggedInBox.style.display = 'flex';
+        if (authTabsBar) authTabsBar.style.display = 'none';
+        if (panelLogin) panelLogin.style.display = 'none';
+        if (panelSignup) panelSignup.style.display = 'none';
+        if (authTitle) authTitle.textContent = `Welcome back, ${name.split(' ')[0]}!`;
+        if (authSubtitle) authSubtitle.textContent = 'You are currently signed in to your Vaishali Foods account.';
+      }
+    } catch (err) {
+      console.warn('Auth check error:', err);
+    }
+  }
+
+  checkExistingAuth();
+
+  loggedInSignout?.addEventListener('click', async () => {
+    try {
+      await signOutUser();
+      window.location.reload();
+    } catch (err: any) {
+      showStatus(err.message || 'Error signing out.', true);
+    }
+  });
+
+  // Handle Live Sign In
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideStatus();
+
+    const emailInput = document.getElementById('login-email') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement | null;
+
+    const email = emailInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+
+    if (!email || !password) {
+      showStatus('Please enter both email and password.', true);
+      return;
+    }
+
+    setButtonLoading(loginBtn, true, 'Signing in...');
+
+    try {
+      const data = await signInUser({ email, password });
+      showStatus('<strong>✓ Signed in successfully!</strong> Welcome back to Vaishali Foods. Redirecting...', false);
+
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect') || '/';
+        window.location.href = redirectUrl;
+      }, 900);
+    } catch (err: any) {
+      setButtonLoading(loginBtn, false, 'Sign In');
+      let msg = err.message || 'Unable to sign in.';
+      if (msg.toLowerCase().includes('invalid login credentials')) {
+        msg = 'Invalid email or password. Please verify your details or create a new account.';
+      }
+      showStatus(`<strong>Error:</strong> ${msg}`, true);
+    }
+  });
+
+  // Handle Live Sign Up
+  signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideStatus();
+
+    const nameInput = document.getElementById('signup-name') as HTMLInputElement | null;
+    const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+    const phoneInput = document.getElementById('signup-phone') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('signup-password') as HTMLInputElement | null;
+
+    const fullName = nameInput?.value.trim() || '';
+    const email = emailInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+
+    if (!fullName || !email || !password) {
+      showStatus('Please fill in all required fields.', true);
+      return;
+    }
+
+    if (password.length < 6) {
+      showStatus('Password must be at least 6 characters.', true);
+      return;
+    }
+
+    setButtonLoading(signupBtn, true, 'Creating account...');
+
+    try {
+      const data = await signUpUser({ email, password, fullName, phone });
+      showStatus('<strong>✓ Account created successfully!</strong> Your profile and delivery info have been saved. Welcome to Vaishali Foods!', false);
+
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 1000);
+    } catch (err: any) {
+      setButtonLoading(signupBtn, false, 'Create Vaishali Foods Account');
+      let msg = err.message || 'Unable to create account.';
+      if (msg.toLowerCase().includes('already registered')) {
+        msg = 'This email is already registered. Please sign in instead.';
+      }
+      showStatus(`<strong>Error:</strong> ${msg}`, true);
+    }
+  });
+</script>

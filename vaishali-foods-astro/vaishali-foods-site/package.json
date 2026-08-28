@@ -9,6 +9,8 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^7.0.0"
+    "@supabase/supabase-js": "^2.112.4",
+    "astro": "^7.2.9",
+    "magic-string": "^1.2.3"
   }
 }

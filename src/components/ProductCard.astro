@@ -3,20 +3,24 @@ const { product } = Astro.props;
 const firstVariant = product.variants[0];
 ---
 
-<a href={`/products/${product.id}`} class="product-card-link">
 <article class="card product-card" data-product-id={product.id}>
-<div class="product-image-wrap">
-  <img
-    class="product-image"
-    src={product.image}
-    alt={product.name}
-    loading="lazy"
-    decoding="async"
-  />
-</div>
+  <a href={`/products/${product.id}`} class="product-card-link">
+    <div class="product-image-wrap">
+      <img
+        class="product-image"
+        src={product.image}
+        alt={product.name}
+        loading="lazy"
+        decoding="async"
+      />
+    </div>
+  </a>
+
   <div class="card-body">
     <div class="card-top">
-      <h3>{product.name}</h3>
+      <a href={`/products/${product.id}`} class="product-card-title-link">
+        <h3>{product.name}</h3>
+      </a>
 
       <span class="price product-price">
         {
@@ -81,7 +85,6 @@ const firstVariant = product.variants[0];
     </div>
   </div>
 </article>
-</a>
 
 <script is:inline>
   document.querySelectorAll('.product-card').forEach((card) => {
@@ -92,9 +95,33 @@ const firstVariant = product.variants[0];
     const priceElement = card.querySelector('.product-price');
     const weightElement = card.querySelector('.selected-weight');
     const addButton = card.querySelector('.add-to-cart');
+    const titleLink = card.querySelector('.product-card-title-link');
+    const imageLink = card.querySelector('.product-card-link');
+
+    if (addButton) {
+      addButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    }
+
+    if (titleLink) {
+      titleLink.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
+    }
+
+    if (imageLink) {
+      imageLink.addEventListener('click', (event) => {
+        event.stopPropagation();
+      });
+    }
 
     options.forEach((option) => {
-      option.addEventListener('click', () => {
+      option.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
         options.forEach((item) => {
           item.classList.remove('active');
           item.setAttribute('aria-pressed', 'false');
