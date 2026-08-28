@@ -960,10 +960,10 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     } catch (err: any) {
       setButtonLoading(signupBtn, false, 'Create Vaishali Foods Account');
       let msg = err.message || 'Unable to create account.';
-      if (msg.toLowerCase().includes('already registered')) {
-        msg = 'This email is already registered. Please sign in instead.';
+      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+        msg = 'This email is already registered. Please switch to the "Sign In" tab to log in.';
       }
-      showStatus(`<strong>Error:</strong> ${msg}`, true);
+      showStatus(`<strong>Notice:</strong> ${msg}`, true);
     }
   });
 </script>

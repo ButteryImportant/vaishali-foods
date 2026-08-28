@@ -40,20 +40,18 @@ export async function signUpUser({ email, password, fullName, phone }) {
     throw error;
   }
 
-  // If user signed up and session is established, ensure profile table has the latest data
-  if (data?.user) {
+  // Check if user already exists (Supabase returns empty identities array to prevent email enumeration)
+  if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    throw new Error('This email is already registered. Please switch to Sign In.');
+  }
+
+  // Ensure active session is established immediately
+  if (!data?.session) {
     try {
-      await supabase
-        .from('profiles')
-        .upsert({
-          id: data.user.id,
-          full_name: fullName,
-          email: email,
-          phone: phone,
-          updated_at: new Date().toISOString(),
-        });
-    } catch (profileErr) {
-      console.warn('Profile sync non-blocking warning:', profileErr);
+      const loginData = await signInUser({ email, password });
+      return loginData;
+    } catch (signInErr) {
+      console.warn('Auto sign-in fallback:', signInErr);
     }
   }
 
