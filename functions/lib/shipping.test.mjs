@@ -3,11 +3,39 @@ import assert from 'node:assert/strict';
 
 import {
   getEstimatedShippingAmount,
-  calculateShippingProfile
+  calculateShippingProfile,
+  getStandardShippingRate,
+  getShippingQuote
 } from './shipping.js';
 import { selectCheapestCourier } from './shiprocket.js';
 
 const defaultEnv = { SHIPROCKET_VOLUMETRIC_DIVISOR: '5000' };
+
+test('getStandardShippingRate returns 80 for 500g or less, and 140 for over 500g', () => {
+  assert.equal(getStandardShippingRate(100), 80);
+  assert.equal(getStandardShippingRate(400), 80);
+  assert.equal(getStandardShippingRate(500), 80);
+  assert.equal(getStandardShippingRate(501), 140);
+  assert.equal(getStandardShippingRate(800), 140);
+  assert.equal(getStandardShippingRate(1000), 140);
+  assert.equal(getStandardShippingRate(2000), 140);
+});
+
+test('getShippingQuote returns correct quote structure and tier amount', async () => {
+  const quote500g = await getShippingQuote({
+    validatedCart: [{ weightGrams: 400, qty: 1 }],
+    deliveryPincode: '411001'
+  });
+  assert.equal(quote500g.amount, 80);
+  assert.equal(quote500g.actualWeightGrams, 400);
+
+  const quote1kg = await getShippingQuote({
+    validatedCart: [{ weightGrams: 1000, qty: 1 }],
+    deliveryPincode: '411001'
+  });
+  assert.equal(quote1kg.amount, 140);
+  assert.equal(quote1kg.actualWeightGrams, 1000);
+});
 
 test('getEstimatedShippingAmount returns 0 for missing, invalid, zero or negative rates', () => {
   assert.equal(getEstimatedShippingAmount({ providerAmount: undefined }), 0);

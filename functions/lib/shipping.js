@@ -70,6 +70,15 @@ export function calculateShippingProfile(validatedCart, env) {
   };
 }
 
+/**
+ * Calculate standard fixed shipping cost based on weight tiers:
+ * - 500g or less: ₹80
+ * - Above 500g: ₹140
+ */
+export function getStandardShippingRate(weightGrams) {
+  return weightGrams <= 500 ? 80 : 140;
+}
+
 export async function getShippingQuote({
   env,
   validatedCart,
@@ -78,37 +87,20 @@ export async function getShippingQuote({
   paymentMethod = 'prepaid'
 }) {
   const profile = calculateShippingProfile(validatedCart, env);
+  const amount = getStandardShippingRate(profile.actualWeightGrams);
 
-  try {
-    const couriers = await getShippingRates({
-      env,
-      deliveryPincode,
-      weight: profile.actualWeightKg,
-      dimensions: profile.dimensions,
-      cod: paymentMethod === 'cod',
-      declaredValue: orderValue
-    });
-
-    const cheapest = selectCheapestCourier(couriers);
-    const amount = getEstimatedShippingAmount({
-      providerAmount: cheapest.rate
-    });
-
-    return {
-      ...profile,
-      amount,
-      estimateSource: 'provider',
-      courier: {
-        id: cheapest.courier_company_id,
-        name: cheapest.courier_name,
-        estimatedDeliveryDays: cheapest.estimated_delivery_days || null,
-        etd: cheapest.etd || null
-      }
-    };
-  } catch (error) {
-    console.error('Shipping rate failure:', error);
-    throw new Error(`Shipping calculation unavailable: ${error.message}`);
-  }
+  return {
+    ...profile,
+    amount,
+    carrier: 'standard',
+    estimateSource: 'standard_tier',
+    courier: {
+      id: 'standard_courier',
+      name: 'Standard Delivery',
+      estimatedDeliveryDays: '3–7 days',
+      etd: '3–7 business days'
+    }
+  };
 }
 
 export {
