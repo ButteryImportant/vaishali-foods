@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
@@ -236,7 +236,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="auth-footer-note">
             <span>Looking to browse our delicacies?</span>
-            <a href="/shop" class="back-link">Explore Shop Ã¢â€ â€™</a>
+            <a href="/shop" class="back-link">Explore Shop →</a>
           </div>
         </div>
 
@@ -248,7 +248,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="benefits-list">
             <div class="benefit-item">
-              <div class="benefit-icon">Ã°Å¸â€œÂ¦</div>
+              <div class="benefit-icon">📦</div>
               <div>
                 <strong>Express One-Click Checkout</strong>
                 <p>Save default delivery addresses and speed through orders effortlessly.</p>
@@ -256,7 +256,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">Ã°Å¸Å¡Å¡</div>
+              <div class="benefit-icon">🚚</div>
               <div>
                 <strong>Real-Time Shipment Tracking</strong>
                 <p>Direct live tracking integration with Delhivery and Shiprocket couriers.</p>
@@ -264,7 +264,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">Ã¢Å“Â¨</div>
+              <div class="benefit-icon">✨</div>
               <div>
                 <strong>Handmade Fresh on Demand</strong>
                 <p>Pure Cow Ghee, no artificial preservatives, made in small hygienic batches.</p>
@@ -272,7 +272,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">Ã°Å¸Å½Â</div>
+              <div class="benefit-icon">🎁</div>
               <div>
                 <strong>Exclusive Festival Specials</strong>
                 <p>Early access to seasonal sweets, gift boxes, and festive discounts.</p>
@@ -741,158 +741,234 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </style>
 
 <script>
-  import { signUpUser, signInUser, signOutUser, getCurrentSession } from '../lib/supabase.js';
+  import {
+    signUpUser,
+    signInUser,
+    signOutUser,
+    getCurrentSession,
+    getUserProfile,
+  } from '../lib/supabase.js';
 
-  const tabLogin    = document.getElementById('tab-login');
-  const tabSignup   = document.getElementById('tab-signup');
-  const panelLogin  = document.getElementById('panel-login');
+  const tabLogin = document.getElementById('tab-login');
+  const tabSignup = document.getElementById('tab-signup');
+  const panelLogin = document.getElementById('panel-login');
   const panelSignup = document.getElementById('panel-signup');
-  const authTitle   = document.getElementById('auth-title');
+  const authTitle = document.getElementById('auth-title');
   const authSubtitle = document.getElementById('auth-subtitle');
-  const statusBox   = document.getElementById('auth-status');
+  const statusBox = document.getElementById('auth-status');
   const authTabsBar = document.getElementById('auth-tabs-bar');
-  const loggedInBox   = document.getElementById('logged-in-box');
-  const loggedInName  = document.getElementById('logged-in-name');
+  const loggedInBox = document.getElementById('logged-in-box');
+  const loggedInName = document.getElementById('logged-in-name');
   const loggedInEmail = document.getElementById('logged-in-email');
   const loggedInAvatar = document.getElementById('logged-in-avatar');
   const loggedInSignout = document.getElementById('logged-in-signout');
-  const loginForm  = document.getElementById('login-form');
-  const signupForm = document.getElementById('signup-form');
-  const loginBtn   = document.getElementById('login-submit-btn');
-  const signupBtn  = document.getElementById('signup-submit-btn');
 
-  function setBtn(btn, loading, label) {
+  const loginForm = document.getElementById('login-form') as HTMLFormElement | null;
+  const signupForm = document.getElementById('signup-form') as HTMLFormElement | null;
+  const loginBtn = document.getElementById('login-submit-btn');
+  const signupBtn = document.getElementById('signup-submit-btn');
+
+  function setButtonLoading(btn: HTMLElement | null, isLoading: boolean, text?: string) {
     if (!btn) return;
-    const t = btn.querySelector('.btn-text');
-    const s = btn.querySelector('.btn-spinner');
-    const a = btn.querySelector('.btn-arrow');
-    btn.disabled = loading;
-    if (t && label) t.textContent = label;
-    if (s) s.style.display = loading ? 'inline-flex' : 'none';
-    if (a) a.style.display = loading ? 'none' : 'inline-flex';
-  }
+    const btnText = btn.querySelector('.btn-text');
+    const btnSpinner = btn.querySelector('.btn-spinner') as HTMLElement | null;
+    const btnArrow = btn.querySelector('.btn-arrow') as HTMLElement | null;
 
-  function showMsg(html, isErr) {
-    if (!statusBox) return;
-    statusBox.className = 'auth-status-box ' + (isErr ? 'error' : 'success');
-    statusBox.innerHTML = html;
-    statusBox.style.display = 'block';
-  }
-
-  function hideMsg() { if (statusBox) statusBox.style.display = 'none'; }
-
-  function humanError(err) {
-    const msg = (err && err.message ? err.message : '').toLowerCase();
-    if (err && err.name === 'AbortError') return 'The request timed out. Supabase may be rate-limiting — wait 60 seconds then try again, or try on mobile data.';
-    if (msg.includes('timed out')) return 'The request timed out. Supabase may be rate-limiting — wait 60 seconds then try again, or try on mobile data.';
-    if (msg.includes('invalid login') || msg.includes('invalid credentials')) return 'Incorrect email or password.';
-    if (msg === 'email_exists') return 'This email is already registered — use the Sign In tab instead.';
-    if (msg.includes('rate') || msg.includes('too many')) return 'Too many attempts. Please wait 60 seconds before trying again.';
-    return (err && err.message) || 'Something went wrong. Please try again.';
-  }
-
-  function switchTab(toSignup) {
-    hideMsg();
-    if (toSignup) {
-      tabSignup && tabSignup.classList.add('active');
-      tabLogin && tabLogin.classList.remove('active');
-      if (panelSignup) panelSignup.style.display = 'block';
-      if (panelLogin) panelLogin.style.display = 'none';
-      if (authTitle) authTitle.textContent = 'Create New Account';
+    if (isLoading) {
+      btn.setAttribute('disabled', 'true');
+      if (btnText && text) btnText.textContent = text;
+      if (btnSpinner) btnSpinner.style.display = 'inline-flex';
+      if (btnArrow) btnArrow.style.display = 'none';
     } else {
-      tabLogin && tabLogin.classList.add('active');
-      tabSignup && tabSignup.classList.remove('active');
-      if (panelLogin) panelLogin.style.display = 'block';
-      if (panelSignup) panelSignup.style.display = 'none';
-      if (authTitle) authTitle.textContent = 'Access Your Account';
+      btn.removeAttribute('disabled');
+      if (btnText && text) btnText.textContent = text;
+      if (btnSpinner) btnSpinner.style.display = 'none';
+      if (btnArrow) btnArrow.style.display = 'inline-flex';
     }
   }
 
-  if (tabLogin) tabLogin.addEventListener('click', function() { switchTab(false); });
-  if (tabSignup) tabSignup.addEventListener('click', function() { switchTab(true); });
-  if (window.location.hash === '#signup') switchTab(true);
+  function showStatus(message: string, isError: boolean = false) {
+    if (!statusBox) return;
+    statusBox.className = `auth-status-box ${isError ? 'error' : 'success'}`;
+    statusBox.innerHTML = message;
+    statusBox.style.display = 'block';
+  }
 
-  document.querySelectorAll('.password-toggle').forEach(function(btn) {
-    btn.addEventListener('click', function() {
-      var inp = document.getElementById(btn.dataset.target);
-      if (!inp) return;
-      var show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
-      var open = btn.querySelector('.eye-open');
-      var closed = btn.querySelector('.eye-closed');
-      if (open) open.style.display = show ? 'none' : 'block';
-      if (closed) closed.style.display = show ? 'block' : 'none';
+  function hideStatus() {
+    if (statusBox) statusBox.style.display = 'none';
+  }
+
+  function switchTab(isSignup: boolean) {
+    hideStatus();
+    if (isSignup) {
+      tabSignup?.classList.add('active');
+      tabLogin?.classList.remove('active');
+      tabSignup?.setAttribute('aria-selected', 'true');
+      tabLogin?.setAttribute('aria-selected', 'false');
+      if (panelSignup) panelSignup.style.display = 'block';
+      if (panelLogin) panelLogin.style.display = 'none';
+      if (authTitle) authTitle.textContent = 'Create New Account';
+      if (authSubtitle) authSubtitle.textContent = 'Join Vaishali Foods to track deliveries and enjoy pure artisanal sweets.';
+    } else {
+      tabLogin?.classList.add('active');
+      tabSignup?.classList.remove('active');
+      tabLogin?.setAttribute('aria-selected', 'true');
+      tabSignup?.setAttribute('aria-selected', 'false');
+      if (panelLogin) panelLogin.style.display = 'block';
+      if (panelSignup) panelSignup.style.display = 'none';
+      if (authTitle) authTitle.textContent = 'Access Your Account';
+      if (authSubtitle) authSubtitle.textContent = 'Sign in to manage your orders, track shipments, and experience pure traditional taste.';
+    }
+  }
+
+  tabLogin?.addEventListener('click', () => switchTab(false));
+  tabSignup?.addEventListener('click', () => switchTab(true));
+
+  if (window.location.hash === '#signup') {
+    switchTab(true);
+  }
+
+  // Password visibility togglers
+  document.querySelectorAll('.password-toggle').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const targetId = btn.getAttribute('data-target');
+      if (!targetId) return;
+      const input = document.getElementById(targetId) as HTMLInputElement | null;
+      const openIcon = btn.querySelector('.eye-open') as HTMLElement | null;
+      const closedIcon = btn.querySelector('.eye-closed') as HTMLElement | null;
+
+      if (input && input.type === 'password') {
+        input.type = 'text';
+        if (openIcon) openIcon.style.display = 'none';
+        if (closedIcon) closedIcon.style.display = 'block';
+      } else if (input) {
+        input.type = 'password';
+        if (openIcon) openIcon.style.display = 'block';
+        if (closedIcon) closedIcon.style.display = 'none';
+      }
     });
   });
 
-  getCurrentSession().then(function(session) {
-    if (!session || !session.user) return;
-    var meta = session.user.user_metadata || {};
-    var name = meta.full_name || session.user.email || 'Member';
-    var email = session.user.email || '';
-    var initials = name.split(' ').map(function(w) { return w[0]; }).join('').substring(0, 2).toUpperCase() || 'VF';
-    if (loggedInName) loggedInName.textContent = name;
-    if (loggedInEmail) loggedInEmail.textContent = email;
-    if (loggedInAvatar) loggedInAvatar.textContent = initials;
-    if (loggedInBox) loggedInBox.style.display = 'flex';
-    if (authTabsBar) authTabsBar.style.display = 'none';
-    if (panelLogin) panelLogin.style.display = 'none';
-    if (panelSignup) panelSignup.style.display = 'none';
-    if (authTitle) authTitle.textContent = 'Welcome back, ' + name.split(' ')[0] + '!';
-    if (authSubtitle) authSubtitle.textContent = 'You are signed in to your Vaishali Foods account.';
-  }).catch(function() {});
+  // Check if already authenticated on mount
+  async function checkExistingAuth() {
+    try {
+      const session = await getCurrentSession();
+      if (session?.user) {
+        const profile = await getUserProfile(session.user.id);
+        const name = profile?.full_name || session.user.user_metadata?.full_name || 'Valued Member';
+        const email = session.user.email || '';
+        const initials = name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase() || 'VF';
 
-  if (loggedInSignout) {
-    loggedInSignout.addEventListener('click', function() {
-      signOutUser().catch(function() {}).finally(function() {
-        window.location.reload();
-      });
-    });
+        if (loggedInName) loggedInName.textContent = name;
+        if (loggedInEmail) loggedInEmail.textContent = email;
+        if (loggedInAvatar) loggedInAvatar.textContent = initials;
+        if (loggedInBox) loggedInBox.style.display = 'flex';
+        if (authTabsBar) authTabsBar.style.display = 'none';
+        if (panelLogin) panelLogin.style.display = 'none';
+        if (panelSignup) panelSignup.style.display = 'none';
+        if (authTitle) authTitle.textContent = `Welcome back, ${name.split(' ')[0]}!`;
+        if (authSubtitle) authSubtitle.textContent = 'You are currently signed in to your Vaishali Foods account.';
+      }
+    } catch (err) {
+      console.warn('Auth check error:', err);
+    }
   }
 
-  if (loginForm) {
-    loginForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      hideMsg();
-      var email = document.getElementById('login-email') ? document.getElementById('login-email').value.trim() : '';
-      var password = document.getElementById('login-password') ? document.getElementById('login-password').value : '';
-      if (!email || !password) { showMsg('Please enter both email and password.', true); return; }
-      setBtn(loginBtn, true, 'Signing in...');
-      signInUser({ email: email, password: password }).then(function() {
-        showMsg('<strong>Signed in!</strong> Redirecting...', false);
-        setTimeout(function() {
-          var p = new URLSearchParams(window.location.search);
-          window.location.href = p.get('redirect') || '/';
-        }, 600);
-      }).catch(function(err) {
-        setBtn(loginBtn, false, 'Sign In');
-        showMsg('<strong>Error:</strong> ' + humanError(err), true);
-      });
-    });
-  }
+  checkExistingAuth();
 
-  if (signupForm) {
-    signupForm.addEventListener('submit', function(e) {
-      e.preventDefault();
-      hideMsg();
-      var fullName = document.getElementById('signup-name') ? document.getElementById('signup-name').value.trim() : '';
-      var email = document.getElementById('signup-email') ? document.getElementById('signup-email').value.trim() : '';
-      var phone = document.getElementById('signup-phone') ? document.getElementById('signup-phone').value.trim() : '';
-      var password = document.getElementById('signup-password') ? document.getElementById('signup-password').value : '';
-      if (!fullName || !email || !password) { showMsg('Please fill in all required fields.', true); return; }
-      if (password.length < 6) { showMsg('Password must be at least 6 characters.', true); return; }
-      setBtn(signupBtn, true, 'Creating account...');
-      signUpUser({ email: email, password: password, fullName: fullName, phone: phone }).then(function() {
-        showMsg('<strong>Account created!</strong> Welcome to Vaishali Foods. Redirecting...', false);
-        setTimeout(function() {
-          var p = new URLSearchParams(window.location.search);
-          window.location.href = p.get('redirect') || '/';
-        }, 700);
-      }).catch(function(err) {
-        setBtn(signupBtn, false, 'Create Vaishali Foods Account');
-        showMsg('<strong>Notice:</strong> ' + humanError(err), true);
-      });
-    });
-  }
+  loggedInSignout?.addEventListener('click', async () => {
+    try {
+      await signOutUser();
+      window.location.reload();
+    } catch (err: any) {
+      showStatus(err.message || 'Error signing out.', true);
+    }
+  });
+
+  // Handle Live Sign In
+  loginForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideStatus();
+
+    const emailInput = document.getElementById('login-email') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('login-password') as HTMLInputElement | null;
+
+    const email = emailInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+
+    if (!email || !password) {
+      showStatus('Please enter both email and password.', true);
+      return;
+    }
+
+    setButtonLoading(loginBtn, true, 'Signing in...');
+
+    try {
+      await signInUser({ email, password });
+      showStatus('<strong>✓ Signed in successfully!</strong> Welcome back to Vaishali Foods. Redirecting...', false);
+
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect') || '/';
+        window.location.href = redirectUrl;
+      }, 700);
+    } catch (err: any) {
+      setButtonLoading(loginBtn, false, 'Sign In');
+      let msg = err.message || 'Unable to sign in.';
+      if (err.name === 'AbortError' || msg.includes('aborted') || msg.includes('fetch')) {
+        msg = 'Connection to authentication service timed out. Please check your internet connection and try again.';
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
+        msg = 'Invalid email or password. Please verify your details or create a new account.';
+      }
+      showStatus(`<strong>Error:</strong> ${msg}`, true);
+    }
+  });
+
+  // Handle Live Sign Up
+  signupForm?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    hideStatus();
+
+    const nameInput = document.getElementById('signup-name') as HTMLInputElement | null;
+    const emailInput = document.getElementById('signup-email') as HTMLInputElement | null;
+    const phoneInput = document.getElementById('signup-phone') as HTMLInputElement | null;
+    const passwordInput = document.getElementById('signup-password') as HTMLInputElement | null;
+
+    const fullName = nameInput?.value.trim() || '';
+    const email = emailInput?.value.trim() || '';
+    const phone = phoneInput?.value.trim() || '';
+    const password = passwordInput?.value || '';
+
+    if (!fullName || !email || !password) {
+      showStatus('Please fill in all required fields.', true);
+      return;
+    }
+
+    if (password.length < 6) {
+      showStatus('Password must be at least 6 characters.', true);
+      return;
+    }
+
+    setButtonLoading(signupBtn, true, 'Creating account...');
+
+    try {
+      await signUpUser({ email, password, fullName, phone });
+      showStatus('<strong>✓ Account created successfully!</strong> Welcome to Vaishali Foods. Redirecting...', false);
+
+      setTimeout(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect') || '/';
+        window.location.href = redirectUrl;
+      }, 800);
+    } catch (err: any) {
+      setButtonLoading(signupBtn, false, 'Create Vaishali Foods Account');
+      let msg = err.message || 'Unable to create account.';
+      if (err.name === 'AbortError' || msg.includes('aborted') || msg.includes('fetch')) {
+        msg = 'Connection to authentication service timed out. Please check your internet connection and try again.';
+      } else if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+        msg = 'This email is already registered. Please switch to the "Sign In" tab to log in.';
+      }
+      showStatus(`<strong>Notice:</strong> ${msg}`, true);
+    }
+  });
 </script>
-</BaseLayout>
