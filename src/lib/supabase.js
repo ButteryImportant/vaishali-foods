@@ -9,7 +9,22 @@ const SUPABASE_ANON_KEY =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR5ZXdsemFodmhrYmxpZHd5dWttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODc5MDI4ODMsImV4cCI6MjEwMzQ3ODg4M30.J5gtCen1526Wi6O-f_xaVVxLP9KogvBkpsh1cDqyXuM';
 
 /**
- * Singleton Supabase Client with browser session persistence
+ * Custom fetch with strict 9-second timeout to prevent infinite button loading
+ */
+const fetchWithTimeout = (url, options = {}) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 9000);
+
+  // Merge external signal if passed
+  const signal = options.signal || controller.signal;
+
+  return fetch(url, { ...options, signal }).finally(() => {
+    clearTimeout(timeoutId);
+  });
+};
+
+/**
+ * Singleton Supabase Client with browser session persistence & network timeout
  */
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
@@ -18,11 +33,13 @@ export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     detectSessionInUrl: true,
     storage: typeof window !== 'undefined' ? window.localStorage : undefined,
   },
+  global: {
+    fetch: fetchWithTimeout,
+  },
 });
 
 /**
  * Register a new user with metadata (Full Name, Phone)
- * Automatically triggers profile row creation in public.profiles table
  */
 export async function signUpUser({ email, password, fullName, phone }) {
   const { data, error } = await supabase.auth.signUp({
@@ -42,7 +59,7 @@ export async function signUpUser({ email, password, fullName, phone }) {
 
   // Check if user already exists (Supabase returns empty identities array to prevent email enumeration)
   if (data?.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
-    throw new Error('This email is already registered. Please switch to Sign In.');
+    throw new Error('This email is already registered. Please switch to the "Sign In" tab.');
   }
 
   // Ensure active session is established immediately
@@ -51,7 +68,7 @@ export async function signUpUser({ email, password, fullName, phone }) {
       const loginData = await signInUser({ email, password });
       return loginData;
     } catch (signInErr) {
-      console.warn('Auto sign-in fallback:', signInErr);
+      console.warn('Auto sign-in fallback notice:', signInErr);
     }
   }
 
@@ -88,23 +105,32 @@ export async function signOutUser() {
  * Get active session
  */
 export async function getCurrentSession() {
-  const { data: { session }, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error('Error fetching session:', error);
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error) {
+      console.error('Error fetching session:', error);
+      return null;
+    }
+    return session;
+  } catch (err) {
+    console.warn('Get session error:', err);
     return null;
   }
-  return session;
 }
 
 /**
  * Get current authenticated user
  */
 export async function getCurrentUser() {
-  const { data: { user }, error } = await supabase.auth.getUser();
-  if (error) {
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error) {
+      return null;
+    }
+    return user;
+  } catch (err) {
     return null;
   }
-  return user;
 }
 
 /**
@@ -112,17 +138,21 @@ export async function getCurrentUser() {
  */
 export async function getUserProfile(userId) {
   if (!userId) return null;
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', userId)
-    .single();
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
 
-  if (error) {
-    console.warn('Error fetching profile:', error);
+    if (error) {
+      console.warn('Error fetching profile:', error);
+      return null;
+    }
+    return data;
+  } catch (err) {
     return null;
   }
-  return data;
 }
 
 /**

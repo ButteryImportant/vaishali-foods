@@ -904,18 +904,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     setButtonLoading(loginBtn, true, 'Signing in...');
 
     try {
-      const data = await signInUser({ email, password });
+      await signInUser({ email, password });
       showStatus('<strong>✓ Signed in successfully!</strong> Welcome back to Vaishali Foods. Redirecting...', false);
 
       setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);
         const redirectUrl = urlParams.get('redirect') || '/';
         window.location.href = redirectUrl;
-      }, 900);
+      }, 700);
     } catch (err: any) {
       setButtonLoading(loginBtn, false, 'Sign In');
       let msg = err.message || 'Unable to sign in.';
-      if (msg.toLowerCase().includes('invalid login credentials')) {
+      if (err.name === 'AbortError' || msg.includes('aborted') || msg.includes('fetch')) {
+        msg = 'Connection to authentication service timed out. Please check your internet connection and try again.';
+      } else if (msg.toLowerCase().includes('invalid login credentials')) {
         msg = 'Invalid email or password. Please verify your details or create a new account.';
       }
       showStatus(`<strong>Error:</strong> ${msg}`, true);
@@ -950,16 +952,20 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     setButtonLoading(signupBtn, true, 'Creating account...');
 
     try {
-      const data = await signUpUser({ email, password, fullName, phone });
-      showStatus('<strong>✓ Account created successfully!</strong> Your profile and delivery info have been saved. Welcome to Vaishali Foods!', false);
+      await signUpUser({ email, password, fullName, phone });
+      showStatus('<strong>✓ Account created successfully!</strong> Welcome to Vaishali Foods. Redirecting...', false);
 
       setTimeout(() => {
-        window.location.href = '/';
-      }, 1000);
+        const urlParams = new URLSearchParams(window.location.search);
+        const redirectUrl = urlParams.get('redirect') || '/';
+        window.location.href = redirectUrl;
+      }, 800);
     } catch (err: any) {
       setButtonLoading(signupBtn, false, 'Create Vaishali Foods Account');
       let msg = err.message || 'Unable to create account.';
-      if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
+      if (err.name === 'AbortError' || msg.includes('aborted') || msg.includes('fetch')) {
+        msg = 'Connection to authentication service timed out. Please check your internet connection and try again.';
+      } else if (msg.toLowerCase().includes('already registered') || msg.toLowerCase().includes('already exists')) {
         msg = 'This email is already registered. Please switch to the "Sign In" tab to log in.';
       }
       showStatus(`<strong>Notice:</strong> ${msg}`, true);
