@@ -1,9 +1,16 @@
 {
-  "name": "vaishali-foods-main",
+  "name": "vaishali-foods",
+  "type": "module",
+  "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix vaishali-foods-astro/vaishali-foods-site run dev",
-    "build": "npm --prefix vaishali-foods-astro/vaishali-foods-site run build",
-    "preview": "npm --prefix vaishali-foods-astro/vaishali-foods-site run preview"
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.112.4",
+    "astro": "^7.2.9",
+    "magic-string": "^1.2.3"
   }
 }
