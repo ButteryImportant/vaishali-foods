@@ -5,7 +5,5 @@ import cloudflare from '@astrojs/cloudflare';
 export default defineConfig({
   site: 'https://vaishalifoods.in',
   output: 'server',
-  adapter: cloudflare({
-    mode: 'directory'
-  })
+  adapter: cloudflare()
 });
