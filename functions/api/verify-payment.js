@@ -95,7 +95,7 @@ export async function onRequestPost(context) {
       throw new Error('Customer details are missing.');
     }
 
-    const validatedCart = validateCart(body.cart);
+    const validatedCart = await validateCart(body.cart, env);
     const subtotal = calculateSubtotal(validatedCart);
 
     const quote = await getShippingQuote({
@@ -117,6 +117,24 @@ export async function onRequestPost(context) {
 
     result.shipmentCreated = true;
     result.carrier = quote.courier?.name || 'Shiprocket';
+    
+    if (env.VAISHALI_DB) {
+      const orderRecord = {
+        order_id: razorpay_order_id,
+        payment_id: razorpay_payment_id,
+        customer,
+        cart: validatedCart,
+        total: subtotal + quote.amount,
+        shipping: quote.amount,
+        date: new Date().toISOString(),
+        shipmentCreated: result.shipmentCreated
+      };
+      
+      let existingOrders = await env.VAISHALI_DB.get('orders', 'json');
+      if (!existingOrders) existingOrders = [];
+      existingOrders.unshift(orderRecord); // prepend latest
+      await env.VAISHALI_DB.put('orders', JSON.stringify(existingOrders));
+    }
   } catch (error) {
     console.error('Shipment creation error:', error);
     result.shipmentError = error.message;

@@ -1,8 +1,13 @@
-import { products } from '../../src/data/products.js';
+import { products as staticProducts } from '../../src/data/products.js';
 
-function buildProductCatalog() {
+export async function getProductCatalog(env) {
+  let p = staticProducts;
+  if (env && env.VAISHALI_DB) {
+    const stored = await env.VAISHALI_DB.get('products', 'json');
+    if (stored) p = stored;
+  }
   return Object.fromEntries(
-    products.map((product) => [
+    p.map((product) => [
       product.id,
       {
         name: product.name,
@@ -21,15 +26,15 @@ function buildProductCatalog() {
   );
 }
 
-export const PRODUCT_CATALOG = buildProductCatalog();
-
-export function validateCart(cart) {
+export async function validateCart(cart, env) {
   if (!Array.isArray(cart) || cart.length === 0) {
     throw new Error('Your cart is empty.');
   }
 
+  const catalog = await getProductCatalog(env);
+
   return cart.map((item) => {
-    const product = PRODUCT_CATALOG[item.id];
+    const product = catalog[item.id];
     const variant = product?.variants?.[item.weight];
     const quantity = Number(item.qty);
 

@@ -28,7 +28,7 @@ export async function onRequestPost(context) {
 
   let validatedCart;
   try {
-    validatedCart = validateCart(body.cart);
+    validatedCart = await validateCart(body.cart, env);
   } catch (error) {
     return json({ error: error.message }, 400);
   }

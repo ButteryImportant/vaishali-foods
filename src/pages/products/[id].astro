@@ -1,15 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { products } from '../../data/products.js';
+import { getProducts } from '../../utils/db.js';
 
-export function getStaticPaths() {
-  return products.map((product) => ({
-    params: { id: product.id },
-    props: { product }
-  }));
+const products = await getProducts(Astro);
+const { id } = Astro.params;
+const product = products.find(p => p.id === id);
+
+if (!product) {
+  return Astro.redirect('/404');
 }
 
-const { product } = Astro.props;
 const firstVariant = product.variants[0];
 ---
 

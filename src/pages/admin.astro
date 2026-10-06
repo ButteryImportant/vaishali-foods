@@ -1,0 +1,194 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="Admin Dashboard | Vaishali Foods"
+  description="Manage products and view orders."
+  showCart={false}
+>
+  <style>
+    .admin-container { max-width: 1200px; margin: 2rem auto; padding: 1rem; font-family: sans-serif; }
+    .hidden { display: none !important; }
+    .card { background: white; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+    input, button, textarea { width: 100%; margin-bottom: 1rem; padding: 0.8rem; border: 1px solid #ddd; border-radius: 4px; }
+    button { background: #E74C3C; color: white; border: none; font-weight: bold; cursor: pointer; }
+    button:hover { background: #C0392B; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 1rem; text-align: left; border-bottom: 1px solid #ddd; }
+    th { background: #f9f9f9; }
+    .tabs { display: flex; gap: 1rem; margin-bottom: 2rem; }
+    .tab { padding: 0.5rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; font-weight: bold; }
+    .tab.active { border-bottom-color: #E74C3C; color: #E74C3C; }
+    .json-editor { font-family: monospace; height: 300px; }
+  </style>
+
+  <div class="admin-container">
+    <div id="login-view" class="card">
+      <h2>Admin Login</h2>
+      <form id="login-form">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+      </form>
+    </div>
+
+    <div id="dashboard-view" class="hidden">
+      <h1>Admin Dashboard</h1>
+      <button id="logout-btn" style="width: auto; float: right;">Logout</button>
+
+      <div class="tabs">
+        <div class="tab active" data-target="orders-tab">Orders</div>
+        <div class="tab" data-target="products-tab">Products</div>
+      </div>
+
+      <div id="orders-tab" class="card">
+        <h2>Recent Orders</h2>
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Date</th>
+                <th>Customer Name</th>
+                <th>Phone</th>
+                <th>Total Paid</th>
+                <th>Items</th>
+              </tr>
+            </thead>
+            <tbody id="orders-tbody">
+              <tr><td colspan="6">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div id="products-tab" class="card hidden">
+        <h2>Manage Products JSON</h2>
+        <p>Edit the raw JSON to add/remove products, update prices, weights, etc.</p>
+        <textarea id="products-editor" class="json-editor">Loading...</textarea>
+        <button id="save-products-btn">Save Products to Database</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let token = localStorage.getItem('vaishali_admin_token');
+    
+    const loginView = document.getElementById('login-view');
+    const dashboardView = document.getElementById('dashboard-view');
+    const loginForm = document.getElementById('login-form');
+    
+    function showView() {
+      if (token) {
+        loginView.classList.add('hidden');
+        dashboardView.classList.remove('hidden');
+        loadData();
+      } else {
+        loginView.classList.remove('hidden');
+        dashboardView.classList.add('hidden');
+      }
+    }
+    
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const u = document.getElementById('username').value;
+      const p = document.getElementById('password').value;
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: u, password: p })
+      });
+      const data = await res.json();
+      if (data.success) {
+        token = data.token;
+        localStorage.setItem('vaishali_admin_token', token);
+        showView();
+      } else {
+        alert('Login failed: ' + data.error);
+      }
+    });
+
+    document.getElementById('logout-btn').addEventListener('click', () => {
+      localStorage.removeItem('vaishali_admin_token');
+      token = null;
+      showView();
+    });
+
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        document.getElementById('orders-tab').classList.add('hidden');
+        document.getElementById('products-tab').classList.add('hidden');
+        document.getElementById(e.target.dataset.target).classList.remove('hidden');
+      });
+    });
+
+    async function loadData() {
+      try {
+        // Load orders
+        const resOrders = await fetch('/api/admin/orders', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (resOrders.status === 401) {
+            document.getElementById('logout-btn').click();
+            return;
+        }
+        const orders = await resOrders.json();
+        const tbody = document.getElementById('orders-tbody');
+        tbody.innerHTML = '';
+        if (orders.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6">No orders yet.</td></tr>';
+        } else {
+          orders.forEach(o => {
+            const date = new Date(o.date).toLocaleString();
+            const items = o.cart.map(c => `${c.qty}x ${c.name} (${c.weight})`).join(', ');
+            tbody.innerHTML += `
+              <tr>
+                <td>${o.order_id}</td>
+                <td>${date}</td>
+                <td>${o.customer.name}</td>
+                <td>${o.customer.phone}</td>
+                <td>₹${o.total}</td>
+                <td>${items}</td>
+              </tr>
+            `;
+          });
+        }
+
+        // Load products
+        const resProducts = await fetch('/api/admin/products');
+        const products = await resProducts.json();
+        document.getElementById('products-editor').value = JSON.stringify(products, null, 2);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    document.getElementById('save-products-btn').addEventListener('click', async () => {
+      const val = document.getElementById('products-editor').value;
+      try {
+        const parsed = JSON.parse(val);
+        const res = await fetch('/api/admin/products', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(parsed)
+        });
+        const data = await res.json();
+        if (data.success) {
+          alert('Products saved successfully!');
+        } else {
+          alert('Error: ' + data.error);
+        }
+      } catch (e) {
+        alert('Invalid JSON! Please check your syntax.');
+      }
+    });
+
+    showView();
+  </script>
+</BaseLayout>

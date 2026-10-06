@@ -1,7 +1,8 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { products } from '../data/products.js';
+import { getProducts } from '../utils/db.js';
+const products = await getProducts(Astro);
 
 const categories = ['All', 'Sweets', 'Namkeen', 'Combos'];
 ---
