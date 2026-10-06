@@ -1,6 +1,6 @@
-import { validateCart, calculateSubtotal } from '../lib/catalog.js';
-import { getShippingQuote } from '../lib/shipping.js';
-import { createShiprocketShipment } from '../lib/shiprocket.js';
+import { validateCart, calculateSubtotal } from '../../lib/catalog.js';
+import { getShippingQuote } from '../../lib/shipping.js';
+import { createShiprocketShipment } from '../../lib/shiprocket.js';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -43,8 +43,9 @@ function safeEqual(first, second) {
   return difference === 0;
 }
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export const POST = async (context) => {
+  const { request, locals } = context;
+  const env = locals.runtime.env;
 
   if (!env.RAZORPAY_KEY_SECRET) {
     return json({ error: 'Razorpay has not been configured on the server.' }, 500);

@@ -1,5 +1,5 @@
-import { validateCart, calculateSubtotal } from '../lib/catalog.js';
-import { getShippingQuote } from '../lib/shipping.js';
+import { validateCart, calculateSubtotal } from '../../lib/catalog.js';
+import { getShippingQuote } from '../../lib/shipping.js';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -11,8 +11,9 @@ function json(data, status = 200) {
   });
 }
 
-export async function onRequestPost(context) {
-  const { request, env } = context;
+export const POST = async (context) => {
+  const { request, locals } = context;
+  const env = locals.runtime.env;
 
   let body;
   try {
