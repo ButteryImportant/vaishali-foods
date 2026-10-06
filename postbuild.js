@@ -15,7 +15,9 @@ if (fs.existsSync(server)) {
   if (fs.existsSync(entry)) {
     fs.renameSync(entry, index);
   }
-  // Remove the generated wrangler.json that Astro puts inside the server dir
+  // Remove the generated wrangler.json that Astro puts inside the server dir.
+  // This file contains invalid bindings (SESSION KV without id, ASSETS reserved name)
+  // that cause Cloudflare Pages to reject the deployment.
   const wranglerJson = path.join(workerDir, 'wrangler.json');
   if (fs.existsSync(wranglerJson)) {
     fs.unlinkSync(wranglerJson);
@@ -42,4 +44,3 @@ const deployConfig = path.join(root, '.wrangler', 'deploy', 'config.json');
 if (fs.existsSync(deployConfig)) {
   fs.unlinkSync(deployConfig);
 }
-
