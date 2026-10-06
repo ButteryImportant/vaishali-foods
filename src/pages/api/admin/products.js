@@ -1,8 +1,8 @@
 import { products as defaultProducts } from '../../../../src/data/products.js';
 
 export const GET = async (context) => {
-  const { locals } = context;
-  const env = locals?.runtime?.env || {};
+  let env = {};
+  try { env = context.locals.runtime.env; } catch (e) {}
   try {
     let products = defaultProducts;
     if (env.VAISHALI_DB) {
@@ -18,8 +18,9 @@ export const GET = async (context) => {
 }
 
 export const POST = async (context) => {
-  const { request, locals } = context;
-  const env = locals?.runtime?.env || {};
+  const { request } = context;
+  let env = {};
+  try { env = context.locals.runtime.env; } catch (e) {}
   
   // Basic token check
   const authHeader = request.headers.get('Authorization');
