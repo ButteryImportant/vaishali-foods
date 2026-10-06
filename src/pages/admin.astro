@@ -1,4 +1,4 @@
----
+﻿---
 const title = "Vaishali Admin | Dashboard";
 ---
 
@@ -112,7 +112,7 @@ const title = "Vaishali Admin | Dashboard";
     .nav-item.active { background: var(--accent); color: var(--primary); font-weight: 600; }
     .nav-item.active svg { opacity: 1; }
     
-    .main-content { flex: 1; margin-left: 250px; padding: 2rem 3rem; max-width: 1400px; }
+    .main-content { flex: 1; min-width: 0; margin-left: 250px; padding: 2rem 3rem; max-width: 1400px; }
     .panel { display: none; animation: fadeIn 0.3s ease; }
     .panel.active { display: block; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -139,8 +139,8 @@ const title = "Vaishali Admin | Dashboard";
     .cell-items { color: var(--text-muted); font-size: 0.8rem; line-height: 1.4; }
 
     /* Products Grid */
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
-    .product-card { display: flex; flex-direction: column; }
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 1.5rem; }
+    .product-card { display: flex; flex-direction: column; min-width: 0; }
     .pc-img { width: 100%; aspect-ratio: 16/10; object-fit: cover; border-bottom: 1px solid var(--card-border); background: var(--accent); }
     .pc-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; }
     .pc-title { font-weight: 600; font-size: 1rem; margin-bottom: 0.25rem; }
@@ -203,7 +203,7 @@ const title = "Vaishali Admin | Dashboard";
           </div>
           <div>
             <label class="label">Password</label>
-            <input type="password" id="password" class="input" placeholder="••••••••" required />
+            <input type="password" id="password" class="input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem;">Sign In</button>
           <div id="login-error" class="login-error hidden"></div>
@@ -268,7 +268,7 @@ const title = "Vaishali Admin | Dashboard";
               <span>Total Revenue</span>
               <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="stat-val" id="stat-rev">₹0</div>
+            <div class="stat-val" id="stat-rev">â‚¹0</div>
           </div>
           <div class="card stat-card">
             <div class="stat-header">
@@ -499,7 +499,7 @@ const title = "Vaishali Admin | Dashboard";
     }
 
     function rupee(val) {
-      return val === null || val === undefined ? '—' : '₹' + Number(val).toLocaleString('en-IN');
+      return val === null || val === undefined ? 'â€”' : 'â‚¹' + Number(val).toLocaleString('en-IN');
     }
     
     function slug(str) {
@@ -611,7 +611,7 @@ const title = "Vaishali Admin | Dashboard";
         const date = new Date(o.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
         const badge = (o.status === 'paid' || o.payment_id) ? '<span class="badge badge-green">Paid</span>' : '<span class="badge badge-amber">Pending</span>';
         const items = (o.cart || []).map(c => `${c.qty}x ${c.name} (${c.weight})`).join('<br>');
-        const cust = o.customer ? `<strong>${o.customer.name}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${o.customer.phone}</span>` : '—';
+        const cust = o.customer ? `<strong>${o.customer.name}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${o.customer.phone}</span>` : 'â€”';
         return `
           <tr>
             <td class="cell-id">#${o.order_id.slice(-6).toUpperCase()}</td>
@@ -705,8 +705,8 @@ const title = "Vaishali Admin | Dashboard";
       div.innerHTML = `
         <input type="text" class="input vr-label" placeholder="Weight Label (e.g. 500 g)" value="${label}" />
         <input type="number" class="input vr-grams" placeholder="Grams" value="${grams}" />
-        <input type="number" class="input vr-price" placeholder="Price ₹" value="${price}" />
-        <button class="btn btn-ghost btn-icon" onclick="this.parentElement.remove()">✕</button>
+        <input type="number" class="input vr-price" placeholder="Price â‚¹" value="${price}" />
+        <button class="btn btn-ghost btn-icon" onclick="this.parentElement.remove()">âœ•</button>
       `;
       document.getElementById('pm-variants').appendChild(div);
     }
@@ -812,3 +812,6 @@ const title = "Vaishali Admin | Dashboard";
   </script>
 </body>
 </html>
+
+
+
