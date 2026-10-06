@@ -1,5 +1,6 @@
----
+﻿---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
 import { getProducts } from '../../utils/db.js';
 
 const products = await getProducts(Astro);
@@ -20,6 +21,9 @@ const firstVariant = product.variants[0];
         <img
           src={product.image}
           alt={product.name}
+          width="800"
+          height="1200"
+          fetchpriority="high"
           loading="eager"
           decoding="async"
         />
@@ -50,7 +54,7 @@ const firstVariant = product.variants[0];
                   aria-pressed={index === 0 ? 'true' : 'false'}
                 >
                   <span class="variant-weight">{variant.weight}</span>
-                  {variant.price && <span class="variant-price">₹{variant.price}</span>}
+                  {variant.price && <span class="variant-price">â‚¹{variant.price}</span>}
                 </button>
               ))
             }
@@ -59,7 +63,7 @@ const firstVariant = product.variants[0];
 
         <div class="product-detail-section">
           <span class="product-price-display">
-            Price: <strong class="selected-price">₹{firstVariant.price}</strong>
+            Price: <strong class="selected-price">â‚¹{firstVariant.price}</strong>
           </span>
         </div>
 
@@ -82,7 +86,7 @@ const firstVariant = product.variants[0];
 
         <div class="product-detail-info">
           <div class="info-card">
-            <span class="info-icon">📦</span>
+            <span class="info-icon">ðŸ“¦</span>
             <div>
               <h4>Made Fresh</h4>
               <p>Prepared fresh after your order</p>
@@ -90,7 +94,7 @@ const firstVariant = product.variants[0];
           </div>
 
           <div class="info-card">
-            <span class="info-icon">🚚</span>
+            <span class="info-icon">ðŸšš</span>
             <div>
               <h4>Fast Delivery</h4>
               <p>Shipped securely to your doorstep</p>
@@ -98,7 +102,7 @@ const firstVariant = product.variants[0];
           </div>
 
           <div class="info-card">
-            <span class="info-icon">✨</span>
+            <span class="info-icon">âœ¨</span>
             <div>
               <h4>No Preservatives</h4>
               <p>Pure ingredients, traditional recipe</p>
@@ -121,27 +125,7 @@ const firstVariant = product.variants[0];
             .filter((p) => p.id !== product.id)
             .slice(0, 4)
             .map((relatedProduct) => (
-              <a href={`/products/${relatedProduct.id}`} class="product-card-link">
-                <article class="card product-card">
-                  <div class="product-image-wrap">
-                    <img
-                      class="product-image"
-                      src={relatedProduct.image}
-                      alt={relatedProduct.name}
-                      loading="lazy"
-                      decoding="async"
-                    />
-                  </div>
-                  <div class="card-body">
-                    <div class="card-top">
-                      <h3>{relatedProduct.name}</h3>
-                      <span class="price product-price">
-                        ₹{relatedProduct.variants[0].price}
-                      </span>
-                    </div>
-                  </div>
-                </article>
-              </a>
+              <ProductCard product={relatedProduct} />
             ))
         }
       </div>
@@ -157,7 +141,7 @@ const firstVariant = product.variants[0];
 
   .product-detail-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1.1fr 0.9fr;
     gap: 4rem;
     align-items: start;
   }
@@ -169,8 +153,12 @@ const firstVariant = product.variants[0];
 
   .product-detail-image img {
     width: 100%;
-    border-radius: 12px;
+    height: auto;
+    aspect-ratio: 4 / 5;
+    max-height: 75vh;
+    border-radius: 16px;
     object-fit: cover;
+    box-shadow: 0 20px 40px rgba(74, 41, 31, 0.08);
   }
 
   .product-detail-header {
@@ -343,7 +331,7 @@ const firstVariant = product.variants[0];
 
         const product = JSON.parse(addButton.dataset.product);
 
-        priceDisplay.textContent = price === null ? 'Price coming soon' : `₹${price}`;
+        priceDisplay.textContent = price === null ? 'Price coming soon' : `â‚¹${price}`;
 
         addButton.disabled = price === null;
         addButton.textContent = price === null ? 'Coming Soon' : 'Add to Cart';
@@ -359,3 +347,6 @@ const firstVariant = product.variants[0];
     });
   });
 </script>
+
+
+

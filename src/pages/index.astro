@@ -1,4 +1,4 @@
----
+﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { getProducts } from '../utils/db.js';
@@ -18,7 +18,7 @@ const featuredProducts = products.filter((product) => product.featured);
 
         <p>
           Freshly prepared laddoos and snacks made on demand with carefully
-          selected ingredients—packed with warmth and delivered to your
+          selected ingredientsâ€”packed with warmth and delivered to your
           doorstep.
         </p>
 
@@ -34,21 +34,17 @@ const featuredProducts = products.filter((product) => product.featured);
       </div>
 
       <div class="hero-art">
-        <img
-          class="hero-logo"
-          src="/images/logo.png"
-          alt="Vaishali Foods emblem"
-        />
+        <img class="hero-logo" src="/images/logo.png" alt="Vaishali Foods emblem" fetchpriority="high" />
 
-        <div class="hero-badge one">✨ Made on demand</div>
-        <div class="hero-badge two">🌿 No preservatives</div>
+        <div class="hero-badge one">âœ¨ Made on demand</div>
+        <div class="hero-badge two">ðŸŒ¿ No preservatives</div>
       </div>
     </div>
   </section>
 
   <div class="container trust-row">
     <div class="trust">
-      <span class="trust-icon">🪔</span>
+      <span class="trust-icon">ðŸª”</span>
 
       <div>
         <strong>Authentic recipes</strong>
@@ -57,7 +53,7 @@ const featuredProducts = products.filter((product) => product.featured);
     </div>
 
     <div class="trust">
-      <span class="trust-icon">📦</span>
+      <span class="trust-icon">ðŸ“¦</span>
 
       <div>
         <strong>Freshly packed</strong>
@@ -66,7 +62,7 @@ const featuredProducts = products.filter((product) => product.featured);
     </div>
 
     <div class="trust">
-      <span class="trust-icon">🚚</span>
+      <span class="trust-icon">ðŸšš</span>
 
       <div>
         <strong>Doorstep delivery</strong>
@@ -151,7 +147,7 @@ const featuredProducts = products.filter((product) => product.featured);
           <h2>Talk to Vaishali Foods.</h2>
 
           <p>
-            We’ll help with product selection, delivery questions and custom
+            Weâ€™ll help with product selection, delivery questions and custom
             gifting orders.
           </p>
         </div>
@@ -195,7 +191,7 @@ const featuredProducts = products.filter((product) => product.featured);
 
       <div class="testimonials-grid">
         <article class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
 
           <p class="testimonial-text">
             "The laddoos taste exactly like homemade ones. The quality and
@@ -209,7 +205,7 @@ const featuredProducts = products.filter((product) => product.featured);
         </article>
 
         <article class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
 
           <p class="testimonial-text">
             "Ordered for my family in Delhi. Delivered in perfect condition and
@@ -223,7 +219,7 @@ const featuredProducts = products.filter((product) => product.featured);
         </article>
 
         <article class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
 
           <p class="testimonial-text">
             "No artificial preservatives, made with care. My kids loved the
@@ -237,7 +233,7 @@ const featuredProducts = products.filter((product) => product.featured);
         </article>
 
         <article class="testimonial-card">
-          <div class="testimonial-stars">★★★★★</div>
+          <div class="testimonial-stars">â˜…â˜…â˜…â˜…â˜…</div>
 
           <p class="testimonial-text">
             "Excellent packaging and very fresh. The Almond Protein Laddoo is
@@ -271,3 +267,4 @@ const featuredProducts = products.filter((product) => product.featured);
     </div>
   </section>
 </BaseLayout>
+
