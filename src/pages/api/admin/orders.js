@@ -1,6 +1,11 @@
 export const GET = async (context) => {
-  const { request, locals } = context;
-  const env = locals?.runtime?.env || {};
+  const { request } = context;
+  let env = {};
+  try {
+    env = context.locals?.runtime?.env || {};
+  } catch (e) {
+    console.error('locals.runtime throw:', e);
+  }
   
   // Basic token check
   const authHeader = request.headers.get('Authorization');
