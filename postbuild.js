@@ -34,11 +34,12 @@ if (fs.existsSync(client)) {
   fs.rmSync(client, { recursive: true, force: true });
 }
 
-// Step 3: overwrite .wrangler/deploy/config.json to remove any stale pointer
-// that Cloudflare CI may have cached from a previous build. This file redirects
-// wrangler to use a generated wrangler.json instead of our wrangler.jsonc.
-// By resetting it to an empty object we ensure it doesn't override our config.
-const wranglerDeployDir = path.join(root, '.wrangler', 'deploy');
-fs.mkdirSync(wranglerDeployDir, { recursive: true });
-fs.writeFileSync(path.join(wranglerDeployDir, 'config.json'), '{}', 'utf-8');
+// Step 3: delete .wrangler/deploy/config.json if it exists.
+// Cloudflare CI caches this file between builds. If it points to a path that
+// no longer exists (e.g. dist/server/wrangler.json from a previous run),
+// wrangler will crash before our build output is even evaluated.
+const deployConfig = path.join(root, '.wrangler', 'deploy', 'config.json');
+if (fs.existsSync(deployConfig)) {
+  fs.unlinkSync(deployConfig);
+}
 
