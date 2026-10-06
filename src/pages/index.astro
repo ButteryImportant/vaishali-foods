@@ -1,26 +1,21 @@
 ﻿---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { getProducts } from '../utils/db.js';
+import { getProducts, getSettings } from '../utils/db.js';
 const products = await getProducts(Astro);
+const settings = await getSettings(Astro);
 const featuredProducts = products.filter((product) => product.featured);
 ---
 
-<BaseLayout title="Vaishali Foods | Pure Tradition, Fresh Taste">
+<BaseLayout title={`${settings.siteName} | ${settings.siteDescription}`}>
   <section class="hero">
     <div class="container hero-grid">
       <div>
         <span class="eyebrow">Homemade Maharashtrian favourites</span>
 
-        <h1>
-          Tradition you can <em>taste.</em>
-        </h1>
+        <h1 set:html={settings.heroTitle}></h1>
 
-        <p>
-          Freshly prepared laddoos and snacks made on demand with carefully
-          selected ingredientsâ€”packed with warmth and delivered to your
-          doorstep.
-        </p>
+        <p set:html={settings.heroSubtitle}></p>
 
         <div class="hero-actions">
           <a class="btn btn-primary" href="/shop">
@@ -267,4 +262,8 @@ const featuredProducts = products.filter((product) => product.featured);
     </div>
   </section>
 </BaseLayout>
+
+
+
+
 

@@ -1,9 +1,9 @@
-import { products as staticProducts } from '../data/products.js';
+﻿import { products as staticProducts } from '../data/products.js';
 
 export async function getProducts(AstroContext) {
   let p = staticProducts;
   try {
-    const env = AstroContext.locals.runtime?.env;
+    let env = {}; try { env = AstroContext.locals.runtime.env; } catch (e) {}
     if (env && env.VAISHALI_DB) {
       const stored = await env.VAISHALI_DB.get('products', 'json');
       if (stored && Array.isArray(stored)) {
@@ -15,3 +15,27 @@ export async function getProducts(AstroContext) {
   }
   return p;
 }
+
+export async function getSettings(AstroContext) {
+  let settings = {
+    siteName: 'Vaishali Foods',
+    siteDescription: 'Pure Tradition, Fresh Taste',
+    heroTitle: 'Tradition you can <em>taste.</em>',
+    heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients—packed with warmth and delivered to your doorstep.'
+  };
+  try {
+    let env = {};
+    try { env = AstroContext.locals.runtime.env; } catch (e) {}
+    if (env && env.VAISHALI_DB) {
+      const stored = await env.VAISHALI_DB.get('settings', 'json');
+      if (stored) {
+        settings = { ...settings, ...stored };
+      }
+    }
+  } catch (e) {
+    console.error('Error fetching dynamic settings:', e);
+  }
+  return settings;
+}
+
+
