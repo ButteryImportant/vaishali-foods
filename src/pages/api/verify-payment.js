@@ -45,7 +45,7 @@ function safeEqual(first, second) {
 
 export const POST = async (context) => {
   const { request, locals } = context;
-  const env = locals.runtime.env;
+  const env = locals?.runtime?.env || {};
 
   if (!env.RAZORPAY_KEY_SECRET) {
     return json({ error: 'Razorpay has not been configured on the server.' }, 500);

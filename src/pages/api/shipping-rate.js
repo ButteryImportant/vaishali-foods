@@ -13,7 +13,7 @@ function json(data, status = 200) {
 
 export const POST = async (context) => {
   const { request, locals } = context;
-  const env = locals.runtime.env;
+  const env = locals?.runtime?.env || {};
 
   let body;
   try {
