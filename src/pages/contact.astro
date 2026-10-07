@@ -1,5 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSettings } from '../utils/db.js';
+const settings = await getSettings(Astro);
+const whatsappLink = `https://wa.me/${settings.whatsappNumber}`;
+const telLink = `tel:+${settings.whatsappNumber}`;
+const instagramUrl = `https://instagram.com/${settings.instagramHandle}`;
 ---
 
 <BaseLayout
@@ -21,14 +26,14 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <div class="contact-hero-actions">
           <a
             class="btn btn-primary"
-            href="https://wa.me/919730487916"
+            href={whatsappLink}
             target="_blank"
             rel="noreferrer"
           >
             Chat on WhatsApp
           </a>
 
-          <a class="btn btn-secondary" href="tel:+919730487916">
+          <a class="btn btn-secondary" href={telLink}>
             Call us
           </a>
         </div>
@@ -76,7 +81,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               </p>
 
               <a
-                href="https://wa.me/919730487916"
+                href={whatsappLink}
                 target="_blank"
                 rel="noreferrer"
               >
@@ -95,7 +100,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 questions.
               </p>
 
-              <a href="tel:+919730487916">+91 9730487916</a>
+              <a href={telLink}>{settings.phoneDisplay}</a>
             </div>
           </article>
 
@@ -109,8 +114,8 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 support requests.
               </p>
 
-              <a href="mailto:hello@vaishalifoods.in">
-                hello@vaishalifoods.in
+              <a href={`mailto:${settings.contactEmail}`}>
+                {settings.contactEmail}
               </a>
             </div>
           </article>
@@ -126,11 +131,11 @@ import BaseLayout from '../layouts/BaseLayout.astro';
               </p>
 
               <a
-                href="https://instagram.com/vaishali.foods"
+                href={instagramUrl}
                 target="_blank"
                 rel="noreferrer"
               >
-                @vaishali.foods
+                @{settings.instagramHandle}
               </a>
             </div>
           </article>
@@ -254,7 +259,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   </section>
 </BaseLayout>
 
-<script is:inline>
+<script is:inline define:vars={{ whatsappNumber: settings.whatsappNumber }}>
   const form = document.querySelector('#contact-form');
 
   form?.addEventListener('submit', (event) => {
@@ -278,8 +283,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       '',
       `Message: ${message}`
     ].join('\n');
-
-    const whatsappNumber = '919730487916';
 
     window.open(
       `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(

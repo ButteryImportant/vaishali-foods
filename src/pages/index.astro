@@ -159,7 +159,7 @@ const featuredProducts = products.filter((product) => product.featured);
           <a
             class="btn"
             style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.35);"
-            href="https://wa.me/919730487916"
+            href={`https://wa.me/${settings.whatsappNumber}`}
             target="_blank"
             rel="noreferrer"
           >
@@ -252,12 +252,12 @@ const featuredProducts = products.filter((product) => product.featured);
       </div>
 
       <a
-        href="https://instagram.com/vaishali.foods"
+        href={`https://instagram.com/${settings.instagramHandle}`}
         target="_blank"
         rel="noreferrer"
         class="btn btn-primary"
       >
-        Follow @vaishali.foods
+        Follow @{settings.instagramHandle}
       </a>
     </div>
   </section>

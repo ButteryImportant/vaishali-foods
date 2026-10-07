@@ -405,6 +405,34 @@ const title = "Vaishali Admin | Dashboard";
                 <textarea id="set-hero-sub" class="input" rows="2" placeholder="Handcrafted with love, delivered to your door."></textarea>
               </div>
             </div>
+            <hr style="border: 0; border-top: 1px solid var(--card-border);" />
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Contact Details</h3>
+              <p class="card-desc" style="margin-bottom: 1rem;">Email, WhatsApp, phone and Instagram shown across the site. Changes appear immediately, no code edits needed.</p>
+
+              <div class="grid-2">
+                <div>
+                  <label class="label">Contact Email</label>
+                  <input type="email" id="set-email" class="input" placeholder="vaishalisfoodcorner@gmail.com" />
+                </div>
+                <div>
+                  <label class="label">Instagram Handle (without @)</label>
+                  <input type="text" id="set-instagram" class="input" placeholder="vaishali.foods" />
+                </div>
+              </div>
+              <div class="grid-2" style="margin-top: 1rem;">
+                <div>
+                  <label class="label">WhatsApp Number (digits with country code)</label>
+                  <input type="text" id="set-whatsapp" class="input" inputmode="numeric" placeholder="919730487916" />
+                  <p class="hint">Used for all WhatsApp chat links on the site.</p>
+                </div>
+                <div>
+                  <label class="label">Phone Display Text</label>
+                  <input type="text" id="set-phone" class="input" placeholder="+91 9730487916" />
+                  <p class="hint">Shown next to the call button, exactly as typed.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -611,6 +639,10 @@ const title = "Vaishali Admin | Dashboard";
         document.getElementById('set-desc').value = settings.siteDescription || '';
         document.getElementById('set-hero-title').value = settings.heroTitle || '';
         document.getElementById('set-hero-sub').value = settings.heroSubtitle || '';
+        document.getElementById('set-email').value = settings.contactEmail || '';
+        document.getElementById('set-whatsapp').value = settings.whatsappNumber || '';
+        document.getElementById('set-phone').value = settings.phoneDisplay || '';
+        document.getElementById('set-instagram').value = settings.instagramHandle || '';
       } catch (err) {
         toast('Failed to load data', 'error');
       }
@@ -835,7 +867,11 @@ const title = "Vaishali Admin | Dashboard";
         siteName: document.getElementById('set-name').value.trim(),
         siteDescription: document.getElementById('set-desc').value.trim(),
         heroTitle: document.getElementById('set-hero-title').value.trim(),
-        heroSubtitle: document.getElementById('set-hero-sub').value.trim()
+        heroSubtitle: document.getElementById('set-hero-sub').value.trim(),
+        contactEmail: document.getElementById('set-email').value.trim(),
+        whatsappNumber: document.getElementById('set-whatsapp').value.replace(/\D/g, ''),
+        phoneDisplay: document.getElementById('set-phone').value.trim(),
+        instagramHandle: document.getElementById('set-instagram').value.trim().replace(/^@/, '')
       };
 
       try {

@@ -3,6 +3,7 @@ import '../styles/global.css';
 import '../styles/testimonials.css';
 import Header from '../components/Header.astro';
 import CartDrawer from '../components/CartDrawer.astro';
+import { getSettings } from '../utils/db.js';
 
 interface Props {
   title?: string;
@@ -18,6 +19,8 @@ const {
 } = Astro.props;
 
 const currentYear = new Date().getFullYear();
+const settings = await getSettings(Astro);
+const footerWhatsapp = `https://wa.me/${settings.whatsappNumber}`;
 ---
 
 <!doctype html>
@@ -90,7 +93,7 @@ const currentYear = new Date().getFullYear();
 
           <a
             class="footer-whatsapp"
-            href="https://wa.me/919730487916"
+            href={footerWhatsapp}
             target="_blank"
             rel="noreferrer"
           >

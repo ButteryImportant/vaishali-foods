@@ -5,15 +5,26 @@ const DEFAULT_SETTINGS = {
   siteDescription: 'Pure Tradition, Fresh Taste',
   heroTitle: 'Tradition you can <em>taste.</em>',
   heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients\u2014packed with warmth and delivered to your doorstep.',
+  contactEmail: 'vaishalisfoodcorner@gmail.com',
+  whatsappNumber: '919730487916',
+  phoneDisplay: '+91 9730487916',
+  instagramHandle: 'vaishali.foods',
 };
 
 function sanitizeSettings(input = {}) {
   const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '');
+  const email = str(input.contactEmail, 120).trim();
+  const digits = str(input.whatsappNumber, 15).replace(/\D/g, '').slice(0, 15);
+  const handle = str(input.instagramHandle, 50).trim().replace(/^@/, '');
   return {
     siteName: str(input.siteName, 80) || DEFAULT_SETTINGS.siteName,
     siteDescription: str(input.siteDescription, 160) || DEFAULT_SETTINGS.siteDescription,
     heroTitle: str(input.heroTitle, 200) || DEFAULT_SETTINGS.heroTitle,
     heroSubtitle: str(input.heroSubtitle, 500) || DEFAULT_SETTINGS.heroSubtitle,
+    contactEmail: /.+@.+\..+/.test(email) ? email : DEFAULT_SETTINGS.contactEmail,
+    whatsappNumber: digits || DEFAULT_SETTINGS.whatsappNumber,
+    phoneDisplay: str(input.phoneDisplay, 30) || DEFAULT_SETTINGS.phoneDisplay,
+    instagramHandle: handle || DEFAULT_SETTINGS.instagramHandle,
   };
 }
 
