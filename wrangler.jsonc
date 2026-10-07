@@ -3,11 +3,11 @@
 	"compatibility_date": "2025-08-01",
 	"name": "vaishali-foods",
 	"pages_build_output_dir": "./dist",
-	// Create a KV namespace in Cloudflare Dashboard -> Workers & Pages -> KV,
-	// then paste its ID below and uncomment. The binding name MUST be VAISHALI_DB.
-	// "kv_namespaces": [
-	//   { "binding": "VAISHALI_DB", "id": "PASTE_YOUR_KV_NAMESPACE_ID_HERE" }
-	// ],
+	// KV namespace for products, orders and site settings.
+	// The binding name MUST be VAISHALI_DB (the code reads env.VAISHALI_DB).
+	"kv_namespaces": [
+	  { "binding": "VAISHALI_DB", "id": "b8f8ee689f2e42298e40bdcfbe1bf0f6" }
+	],
 	"observability": {
 		"enabled": true
 	}
