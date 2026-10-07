@@ -117,11 +117,20 @@ export const POST = async (context) => {
       paymentId: razorpay_payment_id,
       orderTotal: subtotal + quote.amount,
       profile: quote
-    });
+    }).then(
+      () => {
+        result.shipmentCreated = true;
+      },
+      (error) => {
+        // Shipment booking is optional (e.g. no Delhivery token configured).
+        // The paid order is still recorded below; booking happens manually.
+        console.error('Shipment creation error:', error);
+        result.shipmentError = error.message;
+      }
+    );
 
-    result.shipmentCreated = true;
     result.carrier = quote.courier?.name || 'Delhivery';
-    
+
     if (env.VAISHALI_DB) {
       const orderRecord = {
         order_id: razorpay_order_id,
@@ -130,17 +139,17 @@ export const POST = async (context) => {
         cart: validatedCart,
         total: subtotal + quote.amount,
         shipping: quote.amount,
+        zone: quote.zone || null,
         date: new Date().toISOString(),
         shipmentCreated: result.shipmentCreated
       };
-      
-      let existingOrders = await env.VAISHALI_DB.get('orders', 'json');
-      if (!existingOrders) existingOrders = [];
+
+      const existingOrders = (await env.VAISHALI_DB.get('orders', 'json')) || [];
       existingOrders.unshift(orderRecord); // prepend latest
       await env.VAISHALI_DB.put('orders', JSON.stringify(existingOrders));
     }
   } catch (error) {
-    console.error('Shipment creation error:', error);
+    console.error('Order recording error:', error);
     result.shipmentError = error.message;
   }
 
