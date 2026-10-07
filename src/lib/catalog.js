@@ -1,4 +1,4 @@
-import { products as staticProducts } from '../../src/data/products.js';
+import { products as staticProducts } from '../data/products.js';
 
 export async function getProductCatalog(env) {
   let p = staticProducts;

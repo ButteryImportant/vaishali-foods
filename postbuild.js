@@ -7,17 +7,27 @@ const server = path.join(dist, 'server');
 const workerDir = path.join(dist, '_worker.js');
 const client = path.join(dist, 'client');
 
+if (!fs.existsSync(dist)) {
+  console.error('postbuild: dist/ not found. Did `astro build` succeed?');
+  process.exit(1);
+}
+
 // Step 1: rename dist/server → dist/_worker.js and entry.mjs → index.js
+// (Required by Cloudflare Pages advanced mode for the @astrojs/cloudflare adapter.)
 if (fs.existsSync(server)) {
+  if (fs.existsSync(workerDir)) fs.rmSync(workerDir, { recursive: true, force: true });
   fs.renameSync(server, workerDir);
   const entry = path.join(workerDir, 'entry.mjs');
   const index = path.join(workerDir, 'index.js');
   if (fs.existsSync(entry)) {
+    if (fs.existsSync(index)) fs.rmSync(index, { force: true });
     fs.renameSync(entry, index);
   }
   // Remove the generated wrangler.json that Astro puts inside the server dir.
   // This file contains invalid bindings (SESSION KV without id, ASSETS reserved name)
   // that cause Cloudflare Pages to reject the deployment.
+  // (We already set `session: false` in astro.config.mjs to avoid generating it,
+  // but keep this cleanup for older cached builds.)
   const wranglerJson = path.join(workerDir, 'wrangler.json');
   if (fs.existsSync(wranglerJson)) {
     fs.unlinkSync(wranglerJson);
@@ -44,3 +54,5 @@ const deployConfig = path.join(root, '.wrangler', 'deploy', 'config.json');
 if (fs.existsSync(deployConfig)) {
   fs.unlinkSync(deployConfig);
 }
+
+console.log('postbuild: OK — dist/_worker.js ready for Cloudflare Pages.');

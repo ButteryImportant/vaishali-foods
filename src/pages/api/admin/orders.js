@@ -1,29 +1,19 @@
+import { getEnv, isAuthorized, unauthorized, json } from '../../../lib/admin-auth.js';
+
 export const GET = async (context) => {
-  const { request } = context;
-  let env = {};
-  try {
-    env = context.locals?.runtime?.env || {};
-  } catch (e) {
-    console.error('locals.runtime throw:', e);
-  }
-  
-  // Basic token check
-  const authHeader = request.headers.get('Authorization');
-  if (authHeader !== 'Bearer vaishali-admin-token-xyz') {
-    return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401 });
-  }
+  const env = getEnv(context);
+
+  if (!isAuthorized(context.request, env)) return unauthorized();
 
   try {
     let orders = [];
     if (env.VAISHALI_DB) {
       const stored = await env.VAISHALI_DB.get('orders', 'json');
-      if (stored) orders = stored;
+      if (Array.isArray(stored)) orders = stored;
     }
-    
-    return new Response(JSON.stringify(orders), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+
+    return json(orders);
   } catch (err) {
-    return new Response(JSON.stringify({ error: err.message }), { status: 500 });
+    return json({ error: 'Unable to load orders.' }, 500);
   }
-}
+};

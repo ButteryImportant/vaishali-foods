@@ -501,9 +501,18 @@ const title = "Vaishali Admin | Dashboard";
     function rupee(val) {
       return val === null || val === undefined ? '—' : '\u20B9' + Number(val).toLocaleString('en-IN');
     }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
     
     function slug(str) {
-      return str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      return String(str || 'product').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'product';
     }
 
     // --- Auth & Navigation ---
@@ -570,19 +579,27 @@ const title = "Vaishali Admin | Dashboard";
     // --- Data Loading ---
     async function loadData() {
       try {
+        const authHeaders = { 'Authorization': `Bearer ${token}` };
         const [pRes, oRes, sRes] = await Promise.all([
-          fetch('/api/admin/products'),
-          fetch('/api/admin/orders', { headers: { 'Authorization': `Bearer ${token}` } }),
-          fetch('/api/admin/settings')
+          fetch('/api/admin/products', { headers: authHeaders }),
+          fetch('/api/admin/orders', { headers: authHeaders }),
+          fetch('/api/admin/settings', { headers: authHeaders })
         ]);
         
-        if (oRes.status === 401) {
+        if (oRes.status === 401 || pRes.status === 401 || sRes.status === 401) {
           document.getElementById('logout-btn').click();
+          toast('Session expired. Please sign in again.', 'error');
           return;
+        }
+
+        if (!pRes.ok || !oRes.ok || !sRes.ok) {
+          throw new Error('Server returned an error. If this is a fresh deploy, bind the VAISHALI_DB KV namespace in Cloudflare Pages settings.');
         }
 
         products = await pRes.json();
         orders = await oRes.json();
+        if (!Array.isArray(products)) products = [];
+        if (!Array.isArray(orders)) orders = [];
         const settings = await sRes.json();
         
         renderProducts();
@@ -608,18 +625,20 @@ const title = "Vaishali Admin | Dashboard";
 
     function renderOrders() {
       const buildRow = (o) => {
-        const date = new Date(o.date).toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        const rawDate = o.date ? new Date(o.date) : null;
+        const date = rawDate && !isNaN(rawDate) ? rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
         const badge = (o.status === 'paid' || o.payment_id) ? '<span class="badge badge-green">Paid</span>' : '<span class="badge badge-amber">Pending</span>';
-        const items = (o.cart || []).map(c => `${c.qty}x ${c.name} (${c.weight})`).join('<br>');
-        const cust = o.customer ? `<strong>${o.customer.name}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${o.customer.phone}</span>` : '—';
+        const items = (o.cart || []).map(c => `${Number(c.qty) || 0}x ${escapeHtml(c.name)} (${escapeHtml(c.weight)})`).join('<br>');
+        const cust = o.customer ? `<strong>${escapeHtml(o.customer.name)}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${escapeHtml(o.customer.phone)}</span>` : '—';
+        const shortId = o.order_id ? String(o.order_id).slice(-6).toUpperCase() : '—';
         return `
           <tr>
-            <td class="cell-id">#${o.order_id.slice(-6).toUpperCase()}</td>
-            <td style="white-space: nowrap;">${date}</td>
+            <td class="cell-id">#${escapeHtml(shortId)}</td>
+            <td style="white-space: nowrap;">${escapeHtml(date)}</td>
             <td>${cust}</td>
             <td class="cell-items">${items}</td>
             <td>${badge}</td>
-            <td style="text-align: right; font-weight: 600;">${rupee(o.total)}</td>
+            <td style="text-align: right; font-weight: 600;">${escapeHtml(rupee(o.total))}</td>
           </tr>
         `;
       };
@@ -646,26 +665,29 @@ const title = "Vaishali Admin | Dashboard";
       }
       
       grid.innerHTML = products.map(p => {
+        const safeName = escapeHtml(p.name);
+        const safeNote = escapeHtml(p.note || '');
+        const safeImage = escapeHtml(p.image || '');
         const variantsHTML = (p.variants || []).map(v => `
           <div class="pc-variant-row">
-            <span class="pc-weight">${v.weight}</span>
-            <span class="pc-price">${rupee(v.price)}</span>
+            <span class="pc-weight">${escapeHtml(v.weight)}</span>
+            <span class="pc-price">${escapeHtml(rupee(v.price))}</span>
           </div>
         `).join('');
         
         return `
           <div class="card product-card">
-            <img src="${p.image || ''}" class="pc-img" alt="${p.name}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/></svg>'" />
+            <img src="${safeImage}" class="pc-img" alt="${safeName}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'100%\\' height=\\'100%\\'><rect width=\\'100%\\' height=\\'100%\\' fill=\\'%23f1f5f9\\'/></svg>'" />
             <div class="pc-body">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
-                <h3 class="pc-title">${p.name}</h3>
+                <h3 class="pc-title">${safeName}</h3>
                 ${p.featured ? '<span class="badge badge-blue" style="font-size:0.6rem;">Featured</span>' : ''}
               </div>
-              <p class="pc-note">${p.note || ''}</p>
+              <p class="pc-note">${safeNote}</p>
               <div class="pc-variants">${variantsHTML}</div>
               <div class="pc-actions">
-                <button class="btn btn-secondary" onclick="openProductModal('${p.id}')">Edit Details</button>
-                <button class="btn btn-danger btn-icon" onclick="deleteProduct('${p.id}')">
+                <button class="btn btn-secondary" data-edit-product="${escapeHtml(p.id)}">Edit Details</button>
+                <button class="btn btn-danger btn-icon" data-delete-product="${escapeHtml(p.id)}" aria-label="Delete product">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
                 </button>
               </div>
@@ -673,6 +695,13 @@ const title = "Vaishali Admin | Dashboard";
           </div>
         `;
       }).join('');
+
+      grid.querySelectorAll('[data-edit-product]').forEach((btn) => {
+        btn.addEventListener('click', () => openProductModal(btn.getAttribute('data-edit-product')));
+      });
+      grid.querySelectorAll('[data-delete-product]').forEach((btn) => {
+        btn.addEventListener('click', () => deleteProduct(btn.getAttribute('data-delete-product')));
+      });
     }
 
     // --- Product Editor Modal ---
@@ -702,12 +731,16 @@ const title = "Vaishali Admin | Dashboard";
     function addVariantRow(label = '', grams = '', price = '') {
       const div = document.createElement('div');
       div.className = 'variant-row';
+      const safeLabel = escapeHtml(label);
+      const safeGrams = escapeHtml(grams);
+      const safePrice = escapeHtml(price);
       div.innerHTML = `
-        <input type="text" class="input vr-label" placeholder="Weight Label (e.g. 500 g)" value="${label}" />
-        <input type="number" class="input vr-grams" placeholder="Grams" value="${grams}" />
-        <input type="number" class="input vr-price" placeholder="Price (\u20B9)" value="${price}" />
-        <button class="btn btn-ghost btn-icon" onclick="this.parentElement.remove()">&times;</button>
+        <input type="text" class="input vr-label" placeholder="Weight Label (e.g. 500 g)" value="${safeLabel}" maxlength="30" />
+        <input type="number" class="input vr-grams" placeholder="Grams" value="${safeGrams}" min="0" max="50000" />
+        <input type="number" class="input vr-price" placeholder="Price (\u20B9)" value="${safePrice}" min="0" max="1000000" />
+        <button type="button" class="btn btn-ghost btn-icon" aria-label="Remove variant">&times;</button>
       `;
+      div.querySelector('button').addEventListener('click', () => div.remove());
       document.getElementById('pm-variants').appendChild(div);
     }
 
@@ -721,6 +754,8 @@ const title = "Vaishali Admin | Dashboard";
         price: parseFloat(row.querySelector('.vr-price').value) || 0,
         id: editingProductId ? editingProductId + '-' + slug(row.querySelector('.vr-label').value) : slug(name) + '-' + slug(row.querySelector('.vr-label').value)
       })).filter(v => v.weight);
+
+      if (!variants.length) return toast('Add at least one weight variant', 'error');
 
       const payload = {
         id: editingProductId || slug(name),
@@ -746,15 +781,18 @@ const title = "Vaishali Admin | Dashboard";
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(newList)
         });
+        const data = await res.json().catch(() => ({}));
         if (res.ok) {
           products = newList;
           renderProducts();
           renderStats();
           closeProductModal();
           toast('Product saved');
-        } else throw new Error();
+        } else {
+          throw new Error(data.error || 'Save failed');
+        }
       } catch (err) {
-        toast('Failed to save product', 'error');
+        toast(err.message || 'Failed to save product', 'error');
       }
       
       btn.disabled = false;
@@ -770,16 +808,23 @@ const title = "Vaishali Admin | Dashboard";
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(newList)
         });
+        const data = await res.json().catch(() => ({}));
         if (res.ok) {
           products = newList;
           renderProducts();
           renderStats();
           toast('Product deleted');
-        } else throw new Error();
+        } else {
+          throw new Error(data.error || 'Delete failed');
+        }
       } catch (err) {
-        toast('Failed to delete product', 'error');
+        toast(err.message || 'Failed to delete product', 'error');
       }
     }
+    window.openProductModal = openProductModal;
+    window.closeProductModal = closeProductModal;
+    window.deleteProduct = deleteProduct;
+    window.addVariantRow = addVariantRow;
 
     // --- Settings Save ---
     document.getElementById('btn-save-settings').addEventListener('click', async (e) => {
@@ -799,11 +844,14 @@ const title = "Vaishali Admin | Dashboard";
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify(payload)
         });
+        const data = await res.json().catch(() => ({}));
         if (res.ok) {
           toast('Settings saved successfully');
-        } else throw new Error();
+        } else {
+          throw new Error(data.error || 'Save failed');
+        }
       } catch (err) {
-        toast('Failed to save settings', 'error');
+        toast(err.message || 'Failed to save settings', 'error');
       }
       btn.disabled = false;
     });

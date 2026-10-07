@@ -1,6 +1,10 @@
 # Copy this file to .dev.vars for local Cloudflare Pages development.
 # Never commit real credentials.
 
+ADMIN_USERNAME=vaishali
+ADMIN_PASSWORD=change-me-to-a-strong-password
+ADMIN_TOKEN=change-me-to-a-long-random-string
+
 RAZORPAY_KEY_ID=
 RAZORPAY_KEY_SECRET=
 
