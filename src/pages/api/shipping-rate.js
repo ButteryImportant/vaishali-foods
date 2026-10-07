@@ -1,5 +1,6 @@
 import { validateCart, calculateSubtotal } from '../../lib/catalog.js';
 import { getShippingQuote } from '../../lib/shipping.js';
+import { getRuntimeEnv } from '../../lib/runtime-env.js';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -14,7 +15,7 @@ function json(data, status = 200) {
 export const POST = async (context) => {
   const { request } = context;
   let env = {};
-  try { env = context.locals.runtime.env; } catch (e) {}
+  env = await getRuntimeEnv(context);
 
   let body;
   try {

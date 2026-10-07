@@ -29,7 +29,7 @@ function sanitizeSettings(input = {}) {
 }
 
 export const GET = async (context) => {
-  const env = getEnv(context);
+  const env = await getEnv(context);
   if (!isAuthorized(context.request, env)) return unauthorized();
 
   try {
@@ -46,7 +46,7 @@ export const GET = async (context) => {
 
 export const POST = async (context) => {
   const { request } = context;
-  const env = getEnv(context);
+  const env = await getEnv(context);
 
   if (!isAuthorized(request, env)) return unauthorized();
 

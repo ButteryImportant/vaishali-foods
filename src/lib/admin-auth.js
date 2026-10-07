@@ -1,3 +1,5 @@
+import { getRuntimeEnv } from './runtime-env.js';
+
 /**
  * Shared admin authentication helper for Cloudflare Pages.
  * Credentials are read from environment variables with safe fallbacks
@@ -18,11 +20,7 @@ export function getAdminConfig(env = {}) {
 }
 
 export function getEnv(context) {
-  try {
-    return context?.locals?.runtime?.env || {};
-  } catch {
-    return {};
-  }
+  return getRuntimeEnv(context);
 }
 
 export function isAuthorized(request, env) {

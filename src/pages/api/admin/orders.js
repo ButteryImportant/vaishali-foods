@@ -1,7 +1,7 @@
 import { getEnv, isAuthorized, unauthorized, json } from '../../../lib/admin-auth.js';
 
 export const GET = async (context) => {
-  const env = getEnv(context);
+  const env = await getEnv(context);
 
   if (!isAuthorized(context.request, env)) return unauthorized();
 

@@ -1,5 +1,6 @@
 import { validateCart, calculateSubtotal } from '../../lib/catalog.js';
 import { getShippingQuote } from '../../lib/shipping.js';
+import { getRuntimeEnv } from '../../lib/runtime-env.js';
 import { createDelhiveryShipment } from '../../lib/delhivery.js';
 
 function json(data, status = 200) {
@@ -46,7 +47,7 @@ function safeEqual(first, second) {
 export const POST = async (context) => {
   const { request } = context;
   let env = {};
-  try { env = context.locals.runtime.env; } catch (e) {}
+  env = await getRuntimeEnv(context);
 
   if (!env.RAZORPAY_KEY_SECRET) {
     return json({ error: 'Razorpay has not been configured on the server.' }, 500);

@@ -2,7 +2,7 @@ import { getAdminConfig, getEnv, json } from '../../../lib/admin-auth.js';
 
 export const POST = async (context) => {
   const { request } = context;
-  const env = getEnv(context);
+  const env = await getEnv(context);
   const { username: validUser, password: validPass, token } = getAdminConfig(env);
 
   try {

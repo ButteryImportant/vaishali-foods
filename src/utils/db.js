@@ -1,9 +1,10 @@
 import { products as staticProducts } from '../data/products.js';
+import { getRuntimeEnv } from '../lib/runtime-env.js';
 
 export async function getProducts(AstroContext) {
   let p = staticProducts;
   try {
-    let env = {}; try { env = AstroContext.locals.runtime.env; } catch (e) {}
+    let env = await getRuntimeEnv(AstroContext);
     if (env && env.VAISHALI_DB) {
       const stored = await env.VAISHALI_DB.get('products', 'json');
       if (stored && Array.isArray(stored)) {
@@ -29,7 +30,7 @@ export async function getSettings(AstroContext) {
   };
   try {
     let env = {};
-    try { env = AstroContext.locals.runtime.env; } catch (e) {}
+    env = await getRuntimeEnv(AstroContext);
     if (env && env.VAISHALI_DB) {
       const stored = await env.VAISHALI_DB.get('settings', 'json');
       if (stored) {
