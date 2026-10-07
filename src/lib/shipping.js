@@ -201,18 +201,17 @@ export function calculateShippingProfile(validatedCart, env) {
     (dimensions.lengthCm * dimensions.breadthCm * dimensions.heightCm) /
     volumetricDivisor;
 
+  // Reference only: the store packs dense sweets in small boxes whose
+  // volumetric weight stays below the actual scale weight, so slabs are
+  // always computed on actual weight (see getShippingQuote).
   const volumetricWeightGrams = Math.ceil(volumetricWeightKg * 1000);
-  const chargeableWeightGrams = Math.max(
-    actualWeightGrams,
-    volumetricWeightGrams
-  );
 
   return {
     carrier: 'delhivery',
     actualWeightGrams,
     volumetricWeightGrams,
-    chargeableWeightGrams,
-    chargeableWeightKg: round(chargeableWeightGrams / 1000, 3),
+    chargeableWeightGrams: actualWeightGrams,
+    chargeableWeightKg: round(actualWeightGrams / 1000, 3),
     actualWeightKg: round(actualWeightGrams / 1000, 3),
     dimensions
   };

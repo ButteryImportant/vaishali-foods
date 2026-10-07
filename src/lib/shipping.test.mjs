@@ -87,8 +87,9 @@ test('getShippingQuote returns Delhivery zone quote with ceiled amount', async (
   assert.equal(local.carrier, 'delhivery');
   assert.equal(local.zone, 'A');
   assert.equal(local.courier.name, 'Delhivery Surface');
-  // 500 g actual vs ~1062 g volumetric box -> 3 slabs: 35.40 + 2x34.22 = 103.84 -> 104
-  assert.equal(local.amount, 104);
+  // 500 g actual -> 1 slab: 35.40 -> 36
+  assert.equal(local.slabs, 1);
+  assert.equal(local.amount, 36);
 
   const metro = await getShippingQuote({
     env: defaultEnv,
@@ -96,8 +97,19 @@ test('getShippingQuote returns Delhivery zone quote with ceiled amount', async (
     deliveryPincode: '400001'
   });
   assert.equal(metro.zone, 'D');
-  // 1000 g actual vs ~1062 g volumetric -> 3 slabs: 61.36 + 2x57.82 = 177.00 -> 177
-  assert.equal(metro.amount, 177);
+  // 1000 g actual -> 2 slabs: 61.36 + 57.82 = 119.18 -> 120
+  assert.equal(metro.slabs, 2);
+  assert.equal(metro.amount, 120);
+
+  const kerala = await getShippingQuote({
+    env: defaultEnv,
+    validatedCart: [{ weightGrams: 500, qty: 1 }],
+    deliveryPincode: '682001'
+  });
+  assert.equal(kerala.zone, 'D');
+  // 500 g actual -> 1 slab: 61.36 -> 62
+  assert.equal(kerala.slabs, 1);
+  assert.equal(kerala.amount, 62);
 });
 
 test('getShippingQuote rejects bad pincodes', async () => {
@@ -123,7 +135,8 @@ test('calculateShippingProfile uses Delhivery carrier and divisor', () => {
   assert.equal(profile.carrier, 'delhivery');
   assert.equal(profile.actualWeightGrams, 1000);
   assert.equal(profile.actualWeightKg, 1);
-  assert.equal(profile.chargeableWeightGrams, Math.max(1000, profile.volumetricWeightGrams));
+  // Store packs small dense boxes: slabs run on actual scale weight.
+  assert.equal(profile.chargeableWeightGrams, profile.actualWeightGrams);
 
   const fallback = calculateShippingProfile(cart, { DELHIVERY_VOLUMETRIC_DIVISOR: 'nope' });
   assert.equal(fallback.volumetricWeightGrams, profile.volumetricWeightGrams);
