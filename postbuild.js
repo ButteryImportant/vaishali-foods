@@ -12,7 +12,7 @@ if (!fs.existsSync(dist)) {
   process.exit(1);
 }
 
-// Step 1: rename dist/server → dist/_worker.js and entry.mjs → index.js
+// Step 1: rename dist/server -> dist/_worker.js and entry.mjs -> index.js
 // (Required by Cloudflare Pages advanced mode for the @astrojs/cloudflare adapter.)
 if (fs.existsSync(server)) {
   if (fs.existsSync(workerDir)) fs.rmSync(workerDir, { recursive: true, force: true });
@@ -55,4 +55,4 @@ if (fs.existsSync(deployConfig)) {
   fs.unlinkSync(deployConfig);
 }
 
-console.log('postbuild: OK — dist/_worker.js ready for Cloudflare Pages.');
+console.log('postbuild: OK - dist/_worker.js ready for Cloudflare Pages.');

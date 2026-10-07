@@ -1,4 +1,4 @@
-# Vaishali Foods — Astro storefront
+# Vaishali Foods - Astro storefront
 
 A mobile-first branded storefront prepared for Cloudflare Pages.
 
@@ -12,17 +12,17 @@ npm run dev
 ## Deploy to Cloudflare Pages
 
 1. Push this folder to a GitHub repository.
-2. In Cloudflare Dashboard → Workers & Pages → Create → Pages → Connect to Git.
+2. In Cloudflare Dashboard -> Workers & Pages -> Create -> Pages -> Connect to Git.
 3. Framework preset: **Astro**. Build command: `npm run build`
 4. Build output directory: `dist`
 5. Deploy. (The `postbuild.js` script converts Astro's `dist/server` output
-   into `dist/_worker.js` which is what Pages expects — no extra setup needed.)
+   into `dist/_worker.js` which is what Pages expects - no extra setup needed.)
 
 ### Enable the admin panel storage (required for saving products/settings)
 
-1. Cloudflare Dashboard → Storage & Databases → **KV** → Create a namespace
+1. Cloudflare Dashboard -> Storage & Databases -> **KV** -> Create a namespace
    (e.g. `vaishali-db`).
-2. Workers & Pages → your project → **Settings → Functions → KV namespace bindings** →
+2. Workers & Pages -> your project -> **Settings -> Functions -> KV namespace bindings** ->
    Add binding: Variable name `VAISHALI_DB`, value = your new namespace.
 3. Redeploy (or Retry deployment). Until this is bound, the admin panel will
    show an explicit "VAISHALI_DB KV namespace is not bound" error instead of
@@ -31,7 +31,7 @@ npm run dev
 ### Admin login
 
 - Default username: `vaishali`, default password: `vaishali`.
-- Change them immediately in **Settings → Variables and Secrets** by setting
+- Change them immediately in **Settings -> Variables and Secrets** by setting
   `ADMIN_USERNAME`, `ADMIN_PASSWORD`, and `ADMIN_TOKEN` (use a long random string).
 - Open `/admin` on your deployed site to sign in.
 
@@ -46,8 +46,8 @@ npm run dev
 ## Delhivery Surface shipping (zone-based rates)
 
 All orders ship from **Nanded, Maharashtra 431605** via **Delhivery Surface**.
-Rates are calculated offline in `src/lib/shipping.js` — no courier API
-needed at checkout — and the resolved zone is shown on the checkout page.
+Rates are calculated offline in `src/lib/shipping.js` - no courier API
+needed at checkout - and the resolved zone is shown on the checkout page.
 
 - **Zone A, Local** (same city as Nanded): base Rs 35.40 + Rs 34.22 per extra 500 g
 - **Zone B, Regional** (destination within ~500 km): base Rs 38.94 + Rs 37.76
@@ -63,22 +63,22 @@ divisor 5000 via `DELHIVERY_VOLUMETRIC_DIVISOR`). The total is rounded up
 to the next whole rupee.
 
 Zone B ("within 500 km") is approximated with postal-circle prefixes
-around Nanded — see `ZONE_B_PREFIXES_2/3` in `src/lib/shipping.js`. If
+around Nanded - see `ZONE_B_PREFIXES_2/3` in `src/lib/shipping.js`. If
 Delhivery ever bills a nearby destination under a different zone, adjust
 those lists to match their panel. After payment, the shipment is booked
 with Delhivery (`createDelhiveryShipment` in `src/lib/delhivery.js`).
 
 ### Required Cloudflare variables
 
-Add these in **Cloudflare Dashboard → Workers & Pages → your project → Settings → Variables and Secrets**:
+Add these in **Cloudflare Dashboard -> Workers & Pages -> your project -> Settings -> Variables and Secrets**:
 
 - `ADMIN_USERNAME`
-- `ADMIN_PASSWORD` (Secret — encrypt it)
-- `ADMIN_TOKEN` (Secret — encrypt it)
+- `ADMIN_PASSWORD` (Secret - encrypt it)
+- `ADMIN_TOKEN` (Secret - encrypt it)
 - `RAZORPAY_KEY_ID`
 - `RAZORPAY_KEY_SECRET` (Secret)
 - `PICKUP_PINCODE` (defaults to 431605 Nanded if unset)
-- `DELHIVERY_API_TOKEN` (Secret — needed to auto-book shipments after payment)
+- `DELHIVERY_API_TOKEN` (Secret - needed to auto-book shipments after payment)
 - `DELHIVERY_SHIPMENT_API_URL`
 - `DELHIVERY_PICKUP_NAME`
 - `DELHIVERY_VOLUMETRIC_DIVISOR`
