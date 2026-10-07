@@ -51,7 +51,7 @@ export const POST = async (context) => {
   try {
     const productsData = sanitizeProducts(await request.json());
     if (!env.VAISHALI_DB) {
-      return json({ error: 'VAISHALI_DB KV namespace is not bound. Create a KV namespace named VAISHALI_DB and bind it in Cloudflare Pages → Settings → Functions → KV namespace bindings.' }, 500);
+      return json({ error: 'VAISHALI_DB KV namespace is not bound. Create a KV namespace named VAISHALI_DB and bind it in Cloudflare Pages -> Settings -> Functions -> KV namespace bindings.' }, 500);
     }
     await env.VAISHALI_DB.put('products', JSON.stringify(productsData));
     return json({ success: true, count: productsData.length });

@@ -1,6 +1,6 @@
 import { validateCart, calculateSubtotal } from '../../lib/catalog.js';
 import { getShippingQuote } from '../../lib/shipping.js';
-import { createShiprocketShipment } from '../../lib/shiprocket.js';
+import { createDelhiveryShipment } from '../../lib/delhivery.js';
 
 function json(data, status = 200) {
   return new Response(JSON.stringify(data), {
@@ -108,17 +108,18 @@ export const POST = async (context) => {
       paymentMethod: 'prepaid'
     });
 
-    await createShiprocketShipment({
+    await createDelhiveryShipment({
       env,
       customer,
       validatedCart,
       orderId: razorpay_order_id,
+      paymentId: razorpay_payment_id,
       orderTotal: subtotal + quote.amount,
       profile: quote
     });
 
     result.shipmentCreated = true;
-    result.carrier = quote.courier?.name || 'Shiprocket';
+    result.carrier = quote.courier?.name || 'Delhivery';
     
     if (env.VAISHALI_DB) {
       const orderRecord = {

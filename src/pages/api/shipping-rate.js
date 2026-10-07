@@ -48,6 +48,8 @@ export const POST = async (context) => {
       success: true,
       shipping: quote.amount,
       carrier: quote.carrier,
+      zone: quote.zone,
+      zoneLabel: quote.zoneLabel,
       estimateSource: quote.estimateSource,
       actualWeightGrams: quote.actualWeightGrams,
       volumetricWeightGrams: quote.volumetricWeightGrams,

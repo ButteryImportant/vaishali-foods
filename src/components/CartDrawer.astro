@@ -17,7 +17,7 @@
       id="close-cart"
       aria-label="Close cart"
     >
-      ×
+      &times;
     </button>
   </div>
 
@@ -26,7 +26,7 @@
   <div class="drawer-foot">
     <div class="total-row">
       <span>Subtotal</span>
-      <span id="cart-total">₹0</span>
+      <span id="cart-total">&#8377;0</span>
     </div>
 
     <button
@@ -134,7 +134,7 @@
               <strong>${item.name}</strong>
 
               <small>
-                ${item.weight} · ${money(item.price)}
+                ${item.weight} \u00b7 ${money(item.price)}
               </small>
 
               <div class="qty-controls">
@@ -144,7 +144,7 @@
                   data-index="${index}"
                   aria-label="Decrease quantity"
                 >
-                  −
+                  &minus;
                 </button>
 
                 <span>${quantity}</span>

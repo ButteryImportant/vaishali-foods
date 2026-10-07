@@ -41,22 +41,32 @@ npm run dev
 - Replace placeholder product images.
 - Confirm all prices, especially Khajoor Laddoo and Combo Pack.
 - Add shipping, privacy, refund and terms pages.
-- Razorpay and Shiprocket require a secure server-side Worker; do not place secret keys in frontend code.
+- Razorpay and Delhivery require a secure server-side Worker; do not place secret keys in frontend code.
 
-## Courier routing and volumetric shipping
+## Delhivery Surface shipping (zone-based rates)
 
-Shipping is calculated server-side in the Astro API routes (`src/pages/api/`).
+All orders ship from **Nanded, Maharashtra 431605** via **Delhivery Surface**.
+Rates are calculated offline in `src/lib/shipping.js` — no courier API
+needed at checkout — and the resolved zone is shown on the checkout page.
 
-- Orders with **actual product weight below 1000 g** use **Delhivery**.
-- Orders with **actual product weight of 1000 g or more** use **Shiprocket**.
-- Exactly 1000 g therefore uses Shiprocket.
-- Below 1 kg uses the 9 × 6 × 3 inch package profile.
-- 1 kg or above uses the 9 × 6 × 6 inch package profile.
-- Chargeable weight is the higher of actual and volumetric weight.
-- The default volumetric divisor is 5000 for both carriers and can be overridden with environment variables.
+- **Zone A, Local** (same city as Nanded): base Rs 35.40 + Rs 34.22 per extra 500 g
+- **Zone B, Regional** (destination within ~500 km): base Rs 38.94 + Rs 37.76
+- **Zone C, Metro to Metro**: base Rs 51.92 + Rs 49.56
+- **Zone D, Rest of India**: base Rs 61.36 + Rs 57.82
+- **Zone E** (Jammu, Himachal, North East excl. Manipur): base Rs 75.52 + Rs 71.98
+- **Zone F** (Kashmir, Manipur, Ladakh, Andaman & Nicobar): base Rs 88.50 + Rs 84.96
 
-The trusted product prices and weights used by the backend are in `src/lib/catalog.js`.
-Keep that file synchronized with `src/data/products.js` whenever products or pack sizes change.
+Math: the first 500 g (or part) is charged the base fare; every further
+500 g slab (or part) adds the additional-slab fare. Chargeable weight is
+the higher of actual and volumetric weight (9 x 6 x 3/6 inch box,
+divisor 5000 via `DELHIVERY_VOLUMETRIC_DIVISOR`). The total is rounded up
+to the next whole rupee.
+
+Zone B ("within 500 km") is approximated with postal-circle prefixes
+around Nanded — see `ZONE_B_PREFIXES_2/3` in `src/lib/shipping.js`. If
+Delhivery ever bills a nearby destination under a different zone, adjust
+those lists to match their panel. After payment, the shipment is booked
+with Delhivery (`createDelhiveryShipment` in `src/lib/delhivery.js`).
 
 ### Required Cloudflare variables
 
@@ -67,16 +77,10 @@ Add these in **Cloudflare Dashboard → Workers & Pages → your project → Set
 - `ADMIN_TOKEN` (Secret — encrypt it)
 - `RAZORPAY_KEY_ID`
 - `RAZORPAY_KEY_SECRET` (Secret)
-- `PICKUP_PINCODE`
-- `DELHIVERY_API_TOKEN` (Secret)
-- `DELHIVERY_RATE_API_URL`
+- `PICKUP_PINCODE` (defaults to 431605 Nanded if unset)
+- `DELHIVERY_API_TOKEN` (Secret — needed to auto-book shipments after payment)
 - `DELHIVERY_SHIPMENT_API_URL`
 - `DELHIVERY_PICKUP_NAME`
 - `DELHIVERY_VOLUMETRIC_DIVISOR`
-- `SHIPROCKET_EMAIL`
-- `SHIPROCKET_PASSWORD` (Secret)
-- `SHIPROCKET_PICKUP_PIN`
-- `SHIPROCKET_PICKUP_LOCATION`
-- `SHIPROCKET_VOLUMETRIC_DIVISOR`
 
 Use `.dev.vars.example` as the local template. Never commit `.dev.vars` or `.env`.

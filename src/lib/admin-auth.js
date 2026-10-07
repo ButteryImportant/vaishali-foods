@@ -3,10 +3,10 @@
  * Credentials are read from environment variables with safe fallbacks
  * for the existing store (username/password default to "vaishali").
  *
- * Set these in Cloudflare Dashboard → Settings → Variables and Secrets:
+ * Set these in Cloudflare Dashboard -> Settings -> Variables and Secrets:
  * - ADMIN_USERNAME (default: vaishali)
- * - ADMIN_PASSWORD (default: vaishali — change this!)
- * - ADMIN_TOKEN   (default: vaishali-admin-token-xyz — change this!)
+ * - ADMIN_PASSWORD (default: vaishali - change this!)
+ * - ADMIN_TOKEN   (default: vaishali-admin-token-xyz - change this!)
  */
 
 export function getAdminConfig(env = {}) {

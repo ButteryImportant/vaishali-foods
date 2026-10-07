@@ -26,7 +26,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             <div>
               <h2>Contact information</h2>
-              <p>We’ll use these details for order and delivery updates.</p>
+              <p>We&#8217;ll use these details for order and delivery updates.</p>
             </div>
           </div>
 
@@ -246,7 +246,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           <div class="checkout-totals" id="checkout-totals">
             <div>
               <span>Subtotal</span>
-              <strong id="checkout-subtotal">₹0</strong>
+              <strong id="checkout-subtotal">&#8377;0</strong>
             </div>
 
             <div>
@@ -256,7 +256,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
             <div class="checkout-total-row">
               <span>Total</span>
-              <strong id="checkout-total">₹0</strong>
+              <strong id="checkout-total">&#8377;0</strong>
             </div>
           </div>
 
@@ -395,9 +395,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     const currentRequestId = ++shippingRequestId;
 
-    shippingElement.textContent = 'Calculating…';
+    shippingElement.textContent = 'Calculating\u2026';
     shippingStatus.textContent =
-      'Checking available delivery partners…';
+      'Calculating Delhivery Surface shipping for your PIN\u2026';
 
     setPaymentButtonsDisabled(true);
 
@@ -445,7 +445,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         pincode,
         courier: data.courier,
         carrier: data.carrier,
-        estimateSource: data.estimateSource || 'provider',
+        zone: data.zone,
+        zoneLabel: data.zoneLabel,
+        estimateSource: data.estimateSource || 'delhivery_zone_table',
         actualWeightGrams: data.actualWeightGrams,
         volumetricWeightGrams: data.volumetricWeightGrams,
         chargeableWeightGrams: data.chargeableWeightGrams,
@@ -462,14 +464,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         verifiedShipping.courier?.etd ||
         verifiedShipping.courier?.estimatedDeliveryDays;
 
-      const estimateLabel =
-        verifiedShipping.estimateSource === 'fallback'
-          ? 'Estimated shipping charge'
-          : 'Selected delivery partner';
+      const zonePart = verifiedShipping.zone
+        ? `Zone ${verifiedShipping.zone} (${verifiedShipping.zoneLabel})`
+        : 'Delivery zone';
 
       shippingStatus.textContent = estimate
-        ? `${courierName} · Estimated delivery: ${estimate}`
-        : `${estimateLabel}`;
+        ? `${courierName} \u00b7 ${zonePart} \u00b7 Estimated delivery: ${estimate}`
+        : `${courierName} \u00b7 ${zonePart}`;
 
       setPaymentButtonsDisabled(false);
     } catch (error) {
@@ -504,7 +505,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     saveCart(updatedCart);
 
     verifiedShipping = null;
-    shippingElement.textContent = 'Recalculating…';
+    shippingElement.textContent = 'Recalculating\u2026';
     setPaymentButtonsDisabled(true);
 
     renderCart();
@@ -522,7 +523,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     saveCart(cart);
 
     verifiedShipping = null;
-    shippingElement.textContent = 'Recalculating…';
+    shippingElement.textContent = 'Recalculating\u2026';
     setPaymentButtonsDisabled(true);
 
     renderCart();
@@ -582,7 +583,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
                 data-action="decrease"
                 aria-label="Decrease quantity"
               >
-                −
+                &minus;
               </button>
 
               <span>${quantity}</span>
@@ -662,9 +663,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     setPaymentButtonsDisabled(true);
 
     if (pincodeInput.value.length === 6) {
-      shippingElement.textContent = 'Waiting…';
+      shippingElement.textContent = 'Waiting\u2026';
       shippingStatus.textContent =
-        'Preparing delivery calculation…';
+        'Preparing delivery calculation\u2026';
 
       pincodeTimer = setTimeout(() => {
         calculateLiveShipping();

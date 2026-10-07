@@ -26,14 +26,14 @@ const firstVariant = product.variants[0];
         {
           firstVariant.price === null
             ? 'Price coming soon'
-            : `₹${firstVariant.price}`
+            : `\u20b9${firstVariant.price}`
         }
       </span>
     </div>
 
     <p class="meta">
       <span class="selected-weight">{firstVariant.weight}</span>
-      · {product.note}
+      &middot; {product.note}
     </p>
 
     {
@@ -141,7 +141,7 @@ const firstVariant = product.variants[0];
         weightElement.textContent = weight;
 
         priceElement.textContent =
-          price === null ? 'Price coming soon' : `₹${price}`;
+          price === null ? 'Price coming soon' : `\u20b9${price}`;
 
         addButton.disabled = price === null;
         addButton.textContent = price === null ? 'Soon' : 'Add';

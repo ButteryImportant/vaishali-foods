@@ -1,4 +1,4 @@
-﻿---
+---
 const title = "Vaishali Admin | Dashboard";
 ---
 
@@ -203,7 +203,7 @@ const title = "Vaishali Admin | Dashboard";
           </div>
           <div>
             <label class="label">Password</label>
-            <input type="password" id="password" class="input" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢" required />
+            <input type="password" id="password" class="input" placeholder="&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;&#8226;" required />
           </div>
           <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem; padding: 0.75rem;">Sign In</button>
           <div id="login-error" class="login-error hidden"></div>
@@ -268,7 +268,7 @@ const title = "Vaishali Admin | Dashboard";
               <span>Total Revenue</span>
               <svg class="stat-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             </div>
-            <div class="stat-val" id="stat-rev">â‚¹0</div>
+            <div class="stat-val" id="stat-rev">&#8377;0</div>
           </div>
           <div class="card stat-card">
             <div class="stat-header">
@@ -499,7 +499,7 @@ const title = "Vaishali Admin | Dashboard";
     }
 
     function rupee(val) {
-      return val === null || val === undefined ? '—' : '\u20B9' + Number(val).toLocaleString('en-IN');
+      return val === null || val === undefined ? '\u2014' : '\u20B9' + Number(val).toLocaleString('en-IN');
     }
 
     function escapeHtml(value) {
@@ -626,11 +626,11 @@ const title = "Vaishali Admin | Dashboard";
     function renderOrders() {
       const buildRow = (o) => {
         const rawDate = o.date ? new Date(o.date) : null;
-        const date = rawDate && !isNaN(rawDate) ? rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '—';
+        const date = rawDate && !isNaN(rawDate) ? rawDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '\u2014';
         const badge = (o.status === 'paid' || o.payment_id) ? '<span class="badge badge-green">Paid</span>' : '<span class="badge badge-amber">Pending</span>';
         const items = (o.cart || []).map(c => `${Number(c.qty) || 0}x ${escapeHtml(c.name)} (${escapeHtml(c.weight)})`).join('<br>');
-        const cust = o.customer ? `<strong>${escapeHtml(o.customer.name)}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${escapeHtml(o.customer.phone)}</span>` : '—';
-        const shortId = o.order_id ? String(o.order_id).slice(-6).toUpperCase() : '—';
+        const cust = o.customer ? `<strong>${escapeHtml(o.customer.name)}</strong><br><span style="color:var(--text-muted);font-size:0.8rem">${escapeHtml(o.customer.phone)}</span>` : '\u2014';
+        const shortId = o.order_id ? String(o.order_id).slice(-6).toUpperCase() : '\u2014';
         return `
           <tr>
             <td class="cell-id">#${escapeHtml(shortId)}</td>

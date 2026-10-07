@@ -1,70 +1,8 @@
-function extractRate(data) {
-  const candidates = [
-    data?.total_amount,
-    data?.total_charge,
-    data?.amount,
-    data?.charge,
-    data?.data?.total_amount,
-    data?.data?.total_charge,
-    Array.isArray(data) ? data[0]?.total_amount : undefined,
-    Array.isArray(data) ? data[0]?.total_charge : undefined
-  ];
-
-  return candidates.map(Number).find((value) => Number.isFinite(value) && value >= 0);
-}
-
-export async function getDelhiveryRate({
-  env,
-  deliveryPincode,
-  orderValue,
-  paymentMethod,
-  profile
-}) {
-  if (!env.DELHIVERY_API_TOKEN || !env.DELHIVERY_RATE_API_URL || !env.PICKUP_PINCODE) {
-    throw new Error('Delhivery rate API has not been configured on the server.');
-  }
-
-  const params = new URLSearchParams({
-    origin_pin: env.PICKUP_PINCODE,
-    destination_pin: deliveryPincode,
-    weight: String(profile.chargeableWeightGrams),
-    length: String(profile.dimensions.lengthCm),
-    width: String(profile.dimensions.breadthCm),
-    height: String(profile.dimensions.heightCm),
-    payment_mode: paymentMethod === 'cod' ? 'COD' : 'Prepaid',
-    cod_amount: paymentMethod === 'cod' ? String(Math.round(orderValue)) : '0'
-  });
-
-  const separator = env.DELHIVERY_RATE_API_URL.includes('?') ? '&' : '?';
-  const response = await fetch(
-    `${env.DELHIVERY_RATE_API_URL}${separator}${params.toString()}`,
-    {
-      headers: {
-        Authorization: `Token ${env.DELHIVERY_API_TOKEN}`,
-        Accept: 'application/json'
-      }
-    }
-  );
-  const data = await response.json().catch(() => ({}));
-
-  if (!response.ok) {
-    console.error('Delhivery rate error:', data);
-    throw new Error(data?.message || 'Unable to calculate Delhivery shipping.');
-  }
-
-  const amount = extractRate(data);
-  if (!Number.isFinite(amount)) {
-    console.error('Unexpected Delhivery rate response:', data);
-    throw new Error('Delhivery returned an unexpected rate response.');
-  }
-
-  return {
-    amount,
-    estimatedDeliveryDays: data?.estimated_days ?? data?.data?.estimated_days ?? null,
-    etd: data?.etd ?? data?.tat ?? data?.data?.etd ?? null
-  };
-}
-
+/**
+ * Delhivery shipment creation (used after successful Razorpay payment).
+ * Shipping RATES are calculated offline in shipping.js from the
+ * Delhivery Surface zone table; this file only books the shipment.
+ */
 export async function createDelhiveryShipment({
   env,
   customer,

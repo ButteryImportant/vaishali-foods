@@ -236,7 +236,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="auth-footer-note">
             <span>Looking to browse our delicacies?</span>
-            <a href="/shop" class="back-link">Explore Shop →</a>
+            <a href="/shop" class="back-link">Explore Shop &rarr;</a>
           </div>
         </div>
 
@@ -248,7 +248,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
           <div class="benefits-list">
             <div class="benefit-item">
-              <div class="benefit-icon">📦</div>
+              <div class="benefit-icon">&#128230;</div>
               <div>
                 <strong>Express One-Click Checkout</strong>
                 <p>Save default delivery addresses and speed through orders effortlessly.</p>
@@ -256,15 +256,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">🚚</div>
+              <div class="benefit-icon">&#128666;</div>
               <div>
                 <strong>Real-Time Shipment Tracking</strong>
-                <p>Direct live tracking integration with Delhivery and Shiprocket couriers.</p>
+                <p>Direct live tracking integration with our Delhivery courier partner.</p>
               </div>
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">✨</div>
+              <div class="benefit-icon">&#10024;</div>
               <div>
                 <strong>Handmade Fresh on Demand</strong>
                 <p>Pure Cow Ghee, no artificial preservatives, made in small hygienic batches.</p>
@@ -272,7 +272,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
             </div>
 
             <div class="benefit-item">
-              <div class="benefit-icon">🎁</div>
+              <div class="benefit-icon">&#127873;</div>
               <div>
                 <strong>Exclusive Festival Specials</strong>
                 <p>Early access to seasonal sweets, gift boxes, and festive discounts.</p>
@@ -905,7 +905,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     try {
       await signInUser({ email, password });
-      showStatus('<strong>✓ Signed in successfully!</strong> Welcome back to Vaishali Foods. Redirecting...', false);
+      showStatus('<strong>\u2713 Signed in successfully!</strong> Welcome back to Vaishali Foods. Redirecting...', false);
 
       setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -953,7 +953,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
     try {
       await signUpUser({ email, password, fullName, phone });
-      showStatus('<strong>✓ Account created successfully!</strong> Welcome to Vaishali Foods. Redirecting...', false);
+      showStatus('<strong>\u2713 Account created successfully!</strong> Welcome to Vaishali Foods. Redirecting...', false);
 
       setTimeout(() => {
         const urlParams = new URLSearchParams(window.location.search);

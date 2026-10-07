@@ -305,7 +305,7 @@ h2{font-size:clamp(2rem,5vw,3.4rem)}
 }
 
 .shop-points span::before {
-  content: '•';
+  content: '\2022';
   color: #b87a45;
 }
 

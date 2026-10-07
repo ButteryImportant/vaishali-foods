@@ -1,4 +1,4 @@
-﻿---
+---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { getProducts } from '../../utils/db.js';
@@ -54,7 +54,7 @@ const firstVariant = product.variants[0];
                   aria-pressed={index === 0 ? 'true' : 'false'}
                 >
                   <span class="variant-weight">{variant.weight}</span>
-                  {variant.price && <span class="variant-price">â‚¹{variant.price}</span>}
+                  {variant.price && <span class="variant-price">&#8377;{variant.price}</span>}
                 </button>
               ))
             }
@@ -63,7 +63,7 @@ const firstVariant = product.variants[0];
 
         <div class="product-detail-section">
           <span class="product-price-display">
-            Price: <strong class="selected-price">â‚¹{firstVariant.price}</strong>
+            Price: <strong class="selected-price">&#8377;{firstVariant.price}</strong>
           </span>
         </div>
 
@@ -86,7 +86,7 @@ const firstVariant = product.variants[0];
 
         <div class="product-detail-info">
           <div class="info-card">
-            <span class="info-icon">ðŸ“¦</span>
+            <span class="info-icon">&#128230;</span>
             <div>
               <h4>Made Fresh</h4>
               <p>Prepared fresh after your order</p>
@@ -94,7 +94,7 @@ const firstVariant = product.variants[0];
           </div>
 
           <div class="info-card">
-            <span class="info-icon">ðŸšš</span>
+            <span class="info-icon">&#128666;</span>
             <div>
               <h4>Fast Delivery</h4>
               <p>Shipped securely to your doorstep</p>
@@ -102,7 +102,7 @@ const firstVariant = product.variants[0];
           </div>
 
           <div class="info-card">
-            <span class="info-icon">âœ¨</span>
+            <span class="info-icon">&#10024;</span>
             <div>
               <h4>No Preservatives</h4>
               <p>Pure ingredients, traditional recipe</p>
@@ -331,7 +331,7 @@ const firstVariant = product.variants[0];
 
         const product = JSON.parse(addButton.dataset.product);
 
-        priceDisplay.textContent = price === null ? 'Price coming soon' : `â‚¹${price}`;
+        priceDisplay.textContent = price === null ? 'Price coming soon' : `\u20b9${price}`;
 
         addButton.disabled = price === null;
         addButton.textContent = price === null ? 'Coming Soon' : 'Add to Cart';

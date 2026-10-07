@@ -1,4 +1,4 @@
-﻿import { products as staticProducts } from '../data/products.js';
+import { products as staticProducts } from '../data/products.js';
 
 export async function getProducts(AstroContext) {
   let p = staticProducts;
@@ -21,7 +21,7 @@ export async function getSettings(AstroContext) {
     siteName: 'Vaishali Foods',
     siteDescription: 'Pure Tradition, Fresh Taste',
     heroTitle: 'Tradition you can <em>taste.</em>',
-    heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients—packed with warmth and delivered to your doorstep.'
+    heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients\u2014packed with warmth and delivered to your doorstep.'
   };
   try {
     let env = {};

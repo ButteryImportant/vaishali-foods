@@ -100,6 +100,8 @@ export const POST = async (context) => {
       subtotal,
       shipping,
       total,
+      zone: quote.zone,
+      zoneLabel: quote.zoneLabel,
       carrier: quote.courier
     });
   } catch (error) {

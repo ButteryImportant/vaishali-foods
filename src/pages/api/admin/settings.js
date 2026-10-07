@@ -1,10 +1,10 @@
-﻿import { getEnv, isAuthorized, unauthorized, json } from '../../../lib/admin-auth.js';
+import { getEnv, isAuthorized, unauthorized, json } from '../../../lib/admin-auth.js';
 
 const DEFAULT_SETTINGS = {
   siteName: 'Vaishali Foods',
   siteDescription: 'Pure Tradition, Fresh Taste',
   heroTitle: 'Tradition you can <em>taste.</em>',
-  heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients—packed with warmth and delivered to your doorstep.',
+  heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients\u2014packed with warmth and delivered to your doorstep.',
 };
 
 function sanitizeSettings(input = {}) {
@@ -42,7 +42,7 @@ export const POST = async (context) => {
   try {
     const settingsData = sanitizeSettings(await request.json());
     if (!env.VAISHALI_DB) {
-      return json({ error: 'VAISHALI_DB KV namespace is not bound. Create a KV namespace named VAISHALI_DB and bind it in Cloudflare Pages → Settings → Functions → KV namespace bindings.' }, 500);
+      return json({ error: 'VAISHALI_DB KV namespace is not bound. Create a KV namespace named VAISHALI_DB and bind it in Cloudflare Pages -> Settings -> Functions -> KV namespace bindings.' }, 500);
     }
     await env.VAISHALI_DB.put('settings', JSON.stringify(settingsData));
     return json({ success: true });
