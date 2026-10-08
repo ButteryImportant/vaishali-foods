@@ -348,6 +348,9 @@ const title = "Vaishali Admin | Dashboard";
             <p>Add, edit, or remove products from your catalog.</p>
           </div>
           <div class="header-actions">
+            <button class="btn btn-secondary" id="btn-reset-products" title="Replace the saved catalog with the prices shipped in code">
+              Reset to defaults
+            </button>
             <button class="btn btn-primary" onclick="openProductModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
               New Product
@@ -829,6 +832,28 @@ const title = "Vaishali Admin | Dashboard";
       
       btn.disabled = false;
       btn.textContent = 'Save Product';
+    });
+
+    document.getElementById('btn-reset-products').addEventListener('click', async () => {
+      if (!confirm('Replace the saved catalog with the default prices from code? Your manual edits will be overwritten.')) return;
+      const btn = document.getElementById('btn-reset-products');
+      btn.disabled = true;
+      try {
+        const res = await fetch('/api/admin/reset-products', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          toast(`Catalog reset (${data.count} products). Reloading...`);
+          setTimeout(() => window.location.reload(), 900);
+        } else {
+          throw new Error(data.error || 'Reset failed');
+        }
+      } catch (err) {
+        toast(err.message || 'Failed to reset catalog', 'error');
+      }
+      btn.disabled = false;
     });
 
     async function deleteProduct(id) {
