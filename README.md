@@ -39,7 +39,7 @@ npm run dev
 
 - Replace `91XXXXXXXXXX` in `src/pages/index.astro` with your WhatsApp number.
 - Replace placeholder product images.
-- Confirm all prices, especially Khajoor Laddoo and Combo Pack.
+- Confirm all prices against the current retail list before launch.
 - Add shipping, privacy, refund and terms pages.
 - Razorpay and Delhivery require a secure server-side Worker; do not place secret keys in frontend code.
 
