@@ -129,7 +129,27 @@
   const mobileUserAvatar = document.getElementById('mobile-user-avatar');
   const mobileSignoutBtn = document.getElementById('mobile-signout-btn');
 
+  // Inline visibility must stay breakpoint-aware: CSS hides the desktop
+  // auth elements on mobile, and any inline display set here overrides CSS.
+  const mobileQuery = window.matchMedia('(max-width: 850px)');
+  let currentSession: any = null;
+
+  function applyAuthVisibility() {
+    const loggedIn = !!currentSession?.user;
+    const mobile = mobileQuery.matches;
+
+    // Desktop header pills live only on desktop.
+    if (headerAuthBtn) headerAuthBtn.style.display = !loggedIn && !mobile ? 'inline-flex' : 'none';
+    if (headerUserMenu) headerUserMenu.style.display = loggedIn && !mobile ? 'inline-flex' : 'none';
+
+    // Mobile drawer entries live only in the mobile menu.
+    if (mobileAuthBtn) mobileAuthBtn.style.display = !loggedIn ? 'flex' : 'none';
+    if (mobileUserProfile) mobileUserProfile.style.display = loggedIn ? 'flex' : 'none';
+  }
+
   async function updateNavAuthState(session: any) {
+    currentSession = session || null;
+
     if (session?.user) {
       let displayName = session.user.user_metadata?.full_name || '';
       let email = session.user.email || '';
@@ -152,25 +172,22 @@
         .toUpperCase() || 'VF';
 
       // Desktop
-      if (headerAuthBtn) headerAuthBtn.style.display = 'none';
-      if (headerUserMenu) headerUserMenu.style.display = 'inline-flex';
       if (userGreeting) userGreeting.textContent = `Hi, ${firstName}`;
       if (userAvatar) userAvatar.textContent = initials;
 
       // Mobile
-      if (mobileAuthBtn) mobileAuthBtn.style.display = 'none';
-      if (mobileUserProfile) mobileUserProfile.style.display = 'flex';
       if (mobileUserName) mobileUserName.textContent = displayName || 'Valued Customer';
       if (mobileUserEmail) mobileUserEmail.textContent = email;
       if (mobileUserAvatar) mobileUserAvatar.textContent = initials;
-    } else {
-      // Logged Out
-      if (headerAuthBtn) headerAuthBtn.style.display = 'inline-flex';
-      if (headerUserMenu) headerUserMenu.style.display = 'none';
-
-      if (mobileAuthBtn) mobileAuthBtn.style.display = 'flex';
-      if (mobileUserProfile) mobileUserProfile.style.display = 'none';
     }
+
+    applyAuthVisibility();
+  }
+
+  if (typeof mobileQuery.addEventListener === 'function') {
+    mobileQuery.addEventListener('change', applyAuthVisibility);
+  } else {
+    window.addEventListener('resize', applyAuthVisibility);
   }
 
   // Initial check
