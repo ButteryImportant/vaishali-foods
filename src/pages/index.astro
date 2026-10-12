@@ -11,7 +11,7 @@ const featuredProducts = products.filter((product) => product.featured);
   <section class="hero">
     <div class="container hero-grid">
       <div>
-        <span class="eyebrow">Homemade Maharashtrian favourites</span>
+        <span class="eyebrow">Homemade in Nanded, Maharashtra</span>
 
         <h1 set:html={settings.heroTitle}></h1>
 
@@ -19,7 +19,7 @@ const featuredProducts = products.filter((product) => product.featured);
 
         <div class="hero-actions">
           <a class="btn btn-primary" href="/shop">
-            Shop favourites
+            Shop bestsellers
           </a>
 
           <a class="btn btn-secondary" href="/about">
@@ -28,40 +28,35 @@ const featuredProducts = products.filter((product) => product.featured);
         </div>
       </div>
 
-      <div class="hero-art">
-        <img class="hero-logo" src="/images/logo.png" alt="Vaishali Foods emblem" fetchpriority="high" />
+      <div class="hero-photo">
+        <img src="/images/products/dryfruit-crush-laddoo.webp" alt="Freshly made Vaishali Foods laddoos" fetchpriority="high" />
 
-        <div class="hero-badge one">&#10024; Made on demand</div>
-        <div class="hero-badge two">&#127807; No preservatives</div>
+        <div class="hero-badge one">Made on demand</div>
+        <div class="hero-badge two">No preservatives</div>
       </div>
     </div>
   </section>
 
-  <div class="container trust-row">
-    <div class="trust">
-      <span class="trust-icon">&#129689;</span>
-
-      <div>
-        <strong>Authentic recipes</strong>
-        <small>Traditional taste, thoughtfully prepared</small>
+  <div class="trust-stats">
+    <div class="container trust-stats-grid">
+      <div class="trust-stat">
+        <strong>0%</strong>
+        <span>Added sugar, ever</span>
       </div>
-    </div>
 
-    <div class="trust">
-      <span class="trust-icon">&#128230;</span>
-
-      <div>
-        <strong>Freshly packed</strong>
-        <small>Prepared after your order</small>
+      <div class="trust-stat">
+        <strong>100%</strong>
+        <span>Made on demand</span>
       </div>
-    </div>
 
-    <div class="trust">
-      <span class="trust-icon">&#128666;</span>
+      <div class="trust-stat">
+        <strong>4</strong>
+        <span>Signature recipes</span>
+      </div>
 
-      <div>
-        <strong>Doorstep delivery</strong>
-        <small>Secure shipping across serviceable PIN codes</small>
+      <div class="trust-stat">
+        <strong>Pan-India</strong>
+        <span>Tracked Delhivery shipping</span>
       </div>
     </div>
   </div>
@@ -70,7 +65,7 @@ const featuredProducts = products.filter((product) => product.featured);
     <div class="container">
       <div class="section-head">
         <div>
-          <span class="eyebrow">Our collection</span>
+          <span class="eyebrow">01 - Our collection</span>
           <h2>Customer favourites</h2>
         </div>
 
@@ -166,80 +161,6 @@ const featuredProducts = products.filter((product) => product.featured);
             Open WhatsApp
           </a>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="section testimonials-section">
-    <div class="container">
-      <div class="section-head">
-        <div>
-          <span class="eyebrow">What customers say</span>
-          <h2>Loved by families</h2>
-        </div>
-
-        <p>
-          Real feedback from customers who trust Vaishali Foods for their
-          celebrations and everyday moments.
-        </p>
-      </div>
-
-      <div class="testimonials-grid">
-        <article class="testimonial-card">
-          <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-
-          <p class="testimonial-text">
-            "The laddoos taste exactly like homemade ones. The quality and
-            freshness are unmatched. Perfect for gifting!"
-          </p>
-
-          <div class="testimonial-author">
-            <span class="author-name">Priya M.</span>
-            <span class="author-location">Mumbai</span>
-          </div>
-        </article>
-
-        <article class="testimonial-card">
-          <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-
-          <p class="testimonial-text">
-            "Ordered for my family in Delhi. Delivered in perfect condition and
-            tasted amazing. Will definitely order again!"
-          </p>
-
-          <div class="testimonial-author">
-            <span class="author-name">Rajesh K.</span>
-            <span class="author-location">Delhi</span>
-          </div>
-        </article>
-
-        <article class="testimonial-card">
-          <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-
-          <p class="testimonial-text">
-            "No artificial preservatives, made with care. My kids loved the
-            Ragi Laddoo. This is how traditional sweets should be!"
-          </p>
-
-          <div class="testimonial-author">
-            <span class="author-name">Anjali S.</span>
-            <span class="author-location">Bangalore</span>
-          </div>
-        </article>
-
-        <article class="testimonial-card">
-          <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
-
-          <p class="testimonial-text">
-            "Excellent packaging and very fresh. The Almond Protein Laddoo is
-            my go-to post-workout snack now!"
-          </p>
-
-          <div class="testimonial-author">
-            <span class="author-name">Vikram D.</span>
-            <span class="author-location">Pune</span>
-          </div>
-        </article>
       </div>
     </div>
   </section>

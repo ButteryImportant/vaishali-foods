@@ -3,8 +3,8 @@ import { getEnv, isAuthorized, unauthorized, json } from '../../../lib/admin-aut
 const DEFAULT_SETTINGS = {
   siteName: 'Vaishali Foods',
   siteDescription: 'Pure Tradition, Fresh Taste',
-  heroTitle: 'Tradition you can <em>taste.</em>',
-  heroSubtitle: 'Freshly prepared laddoos and snacks made on demand with carefully selected ingredients\u2014packed with warmth and delivered to your doorstep.',
+  heroTitle: 'Laddoos like <em>home</em> used to make.',
+  heroSubtitle: 'Slow-made sweets with dates, dry fruits and seeds. No added sugar, no preservatives, prepared fresh in Nanded after you order.',
   contactEmail: 'vaishalisfoodcorner@gmail.com',
   whatsappNumber: '919730487916',
   phoneDisplay: '+91 9730487916',

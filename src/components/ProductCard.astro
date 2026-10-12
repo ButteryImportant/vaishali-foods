@@ -1,11 +1,21 @@
 ---
 const { product } = Astro.props;
 const firstVariant = product.variants[0];
+
+// Editorial badges per product (frontend-only; edit freely).
+const BADGES = {
+  'khajur-dry-fruit-laddoo': 'No Added Sugar',
+  'biotin-laddoo': 'New Recipe',
+  'almond-laddoo': 'Protein Rich',
+  'dryfruit-crush-laddoo': 'New Recipe'
+};
+const badge = BADGES[product.id];
 ---
 
 <article class="card product-card" data-product-id={product.id}>
   <a href={`/products/${product.id}`} class="product-card-link">
     <div class="product-image-wrap">
+      {badge && <span class="card-badge">{badge}</span>}
       <img
         class="product-image"
         src={product.image}
