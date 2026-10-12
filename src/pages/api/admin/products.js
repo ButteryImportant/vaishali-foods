@@ -10,13 +10,23 @@ function sanitizeProducts(list) {
     }
     const variants = Array.isArray(p.variants) ? p.variants : [];
     if (!variants.length) throw new Error(`"${p.name}" needs at least one variant.`);
+    const rawImages = Array.isArray(p.images) ? p.images : [];
+    const images = rawImages
+      .filter((url) => typeof url === 'string' && url.trim())
+      .map((url) => url.trim().slice(0, 2000))
+      .slice(0, 5);
+    const primaryImage =
+      (typeof p.image === 'string' && p.image.trim()
+        ? p.image.trim().slice(0, 2000)
+        : '') || images[0] || '';
     return {
       id: String(p.id || p.name).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'product',
       name: p.name.trim().slice(0, 120),
       note: typeof p.note === 'string' ? p.note.slice(0, 200) : '',
       category: ['Sweets', 'Snacks', 'Combos', 'Namkeen'].includes(p.category) ? p.category : 'Sweets',
       featured: p.featured !== false,
-      image: typeof p.image === 'string' ? p.image.slice(0, 2000) : '',
+      image: primaryImage,
+      images,
       variants: variants.slice(0, 10).map((v) => ({
         id: String(v.id || `${p.name}-${v.weight}`).toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''),
         weight: String(v.weight || '').slice(0, 30),

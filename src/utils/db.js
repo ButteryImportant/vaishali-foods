@@ -26,7 +26,10 @@ export async function getSettings(AstroContext) {
     contactEmail: 'vaishalisfoodcorner@gmail.com',
     whatsappNumber: '919730487916',
     phoneDisplay: '+91 9730487916',
-    instagramHandle: 'vaishali.foods'
+    instagramHandle: 'vaishali.foods',
+    founderName: 'Vaishali Biradar',
+    founderPhoto: '',
+    founderBio: 'Vaishali Biradar is a master at cooking, preparing laddoos, traditional foods and sweets since 2015. Every recipe at Vaishali Foods is hers, perfected over a decade in her own kitchen and made fresh for every order.'
   };
   try {
     let env = {};

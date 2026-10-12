@@ -1,0 +1,204 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getSettings } from '../utils/db.js';
+const settings = await getSettings(Astro);
+const founderName = settings.founderName || 'Vaishali Biradar';
+const initials = founderName.split(' ').map((w) => w[0]).join('').substring(0, 2).toUpperCase() || 'V';
+---
+
+<BaseLayout
+  title={`Our Founder, ${founderName} | Vaishali Foods`}
+  description={`Meet ${founderName}, the cook behind Vaishali Foods, making laddoos and traditional sweets since 2015.`}
+>
+  <section class="founder-hero">
+    <div class="container founder-grid">
+      <div class="founder-photo-card">
+        {settings.founderPhoto ? (
+          <img src={settings.founderPhoto} alt={founderName} fetchpriority="high" />
+        ) : (
+          <div class="founder-monogram" aria-label="Founder photo coming soon">
+            <span>{initials}</span>
+          </div>
+        )}
+        <div class="founder-since">
+          <strong>Since 2015</strong>
+          <span>A decade of homemade sweets</span>
+        </div>
+      </div>
+
+      <div class="founder-copy">
+        <span class="eyebrow">Our founder</span>
+        <h1>{founderName}</h1>
+        <p class="founder-tagline">A master at cooking, and the hands behind every box.</p>
+        <p>{settings.founderBio}</p>
+        <p>
+          No factories, no shortcuts. Small batches, familiar ingredients,
+          and recipes refined over years of cooking for family first,
+          customers second.
+        </p>
+
+        <div class="founder-facts">
+          <div>
+            <strong>2015</strong>
+            <span>Cooking since</span>
+          </div>
+          <div>
+            <strong>4</strong>
+            <span>Signature recipes</span>
+          </div>
+          <div>
+            <strong>100%</strong>
+            <span>Made on demand</span>
+          </div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/shop">Taste her cooking</a>
+          <a class="btn btn-secondary" href="/contact">Say hello</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .founder-hero {
+    padding: 90px 0;
+    background:
+      radial-gradient(circle at 85% 15%, rgba(224, 157, 92, 0.22), transparent 30%),
+      linear-gradient(135deg, #fbf3e6 0%, #f5e3cc 100%);
+  }
+
+  .founder-grid {
+    display: grid;
+    grid-template-columns: 0.85fr 1.15fr;
+    align-items: center;
+    gap: 70px;
+  }
+
+  .founder-photo-card {
+    position: relative;
+  }
+
+  .founder-photo-card img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: 28px;
+    border: 6px solid #fffdf8;
+    box-shadow: var(--shadow);
+  }
+
+  .founder-monogram {
+    display: grid;
+    place-items: center;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 28px;
+    background: linear-gradient(145deg, #4a291f, #331911);
+    color: #fff8eb;
+    border: 6px solid #fffdf8;
+    box-shadow: var(--shadow);
+  }
+
+  .founder-monogram span {
+    font-family: Georgia, serif;
+    font-size: clamp(4rem, 8vw, 7rem);
+    letter-spacing: -0.02em;
+  }
+
+  .founder-since {
+    position: absolute;
+    right: -14px;
+    bottom: 28px;
+    background: var(--white);
+    border: 1px solid rgba(74, 41, 31, 0.1);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 14px 20px;
+    text-align: center;
+  }
+
+  .founder-since strong {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 1.4rem;
+  }
+
+  .founder-since span {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--brown-soft);
+  }
+
+  .founder-copy h1 {
+    margin: 12px 0 10px;
+    font-size: clamp(2.6rem, 4.6vw, 4.4rem);
+    letter-spacing: -0.04em;
+  }
+
+  .founder-tagline {
+    font-family: Georgia, serif;
+    font-size: 1.25rem;
+    color: var(--red);
+    margin: 0 0 18px;
+  }
+
+  .founder-copy p {
+    color: var(--brown-soft);
+    line-height: 1.8;
+    max-width: 560px;
+  }
+
+  .founder-facts {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin: 30px 0;
+    padding: 24px 0;
+    border-top: 1px solid rgba(74, 41, 31, 0.12);
+    border-bottom: 1px solid rgba(74, 41, 31, 0.12);
+  }
+
+  .founder-facts strong {
+    display: block;
+    font-family: Georgia, serif;
+    font-size: 1.9rem;
+  }
+
+  .founder-facts span {
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--brown-soft);
+  }
+
+  @media (max-width: 900px) {
+    .founder-grid {
+      grid-template-columns: 1fr;
+      gap: 45px;
+    }
+
+    .founder-since {
+      right: 8px;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .founder-hero {
+      padding: 66px 0 60px;
+    }
+
+    .founder-copy h1 {
+      font-size: 2.5rem;
+    }
+
+    .founder-facts {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+  }
+</style>

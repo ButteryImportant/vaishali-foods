@@ -436,6 +436,26 @@ const title = "Vaishali Admin | Dashboard";
                 </div>
               </div>
             </div>
+            <hr style="border: 0; border-top: 1px solid var(--card-border);" />
+            <div>
+              <h3 style="font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem;">Founder</h3>
+              <p class="card-desc" style="margin-bottom: 1rem;">Shown on the founder page. Add her photo URL whenever ready.</p>
+
+              <div class="grid-2">
+                <div>
+                  <label class="label">Founder Name</label>
+                  <input type="text" id="set-founder-name" class="input" placeholder="Vaishali Biradar" />
+                </div>
+                <div>
+                  <label class="label">Founder Photo URL</label>
+                  <input type="url" id="set-founder-photo" class="input" placeholder="https://... or /images/..." />
+                </div>
+              </div>
+              <div style="margin-top: 1rem;">
+                <label class="label">Founder Story</label>
+                <textarea id="set-founder-bio" class="input" rows="3" placeholder="A few lines about her cooking journey."></textarea>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -479,8 +499,15 @@ const title = "Vaishali Admin | Dashboard";
           </div>
         </div>
         <div>
-          <label class="label">Image URL</label>
-          <input type="url" id="pm-img" class="input" placeholder="https://..." />
+          <label class="label">Product Photos (up to 5, shown as slides)</label>
+          <div style="display: grid; gap: 0.5rem;">
+            <input type="url" class="input pm-img" data-img-index="0" placeholder="Photo 1 (main) - https://... or /images/..." />
+            <input type="url" class="input pm-img" data-img-index="1" placeholder="Photo 2 (optional)" />
+            <input type="url" class="input pm-img" data-img-index="2" placeholder="Photo 3 (optional)" />
+            <input type="url" class="input pm-img" data-img-index="3" placeholder="Photo 4 (optional)" />
+            <input type="url" class="input pm-img" data-img-index="4" placeholder="Photo 5 (optional)" />
+          </div>
+          <p class="hint">First photo is the cover shown in cards. Upload pictures to your site images folder or paste links.</p>
         </div>
 
         <div style="margin-top: 0.5rem;">
@@ -646,6 +673,9 @@ const title = "Vaishali Admin | Dashboard";
         document.getElementById('set-whatsapp').value = settings.whatsappNumber || '';
         document.getElementById('set-phone').value = settings.phoneDisplay || '';
         document.getElementById('set-instagram').value = settings.instagramHandle || '';
+        document.getElementById('set-founder-name').value = settings.founderName || '';
+        document.getElementById('set-founder-photo').value = settings.founderPhoto || '';
+        document.getElementById('set-founder-bio').value = settings.founderBio || '';
       } catch (err) {
         toast('Failed to load data', 'error');
       }
@@ -750,7 +780,10 @@ const title = "Vaishali Admin | Dashboard";
       document.getElementById('pm-note').value = p.note || '';
       document.getElementById('pm-category').value = p.category || 'Sweets';
       document.getElementById('pm-featured').value = p.featured === false ? 'false' : 'true';
-      document.getElementById('pm-img').value = p.image || '';
+      const existingImages = Array.isArray(p.images) && p.images.length ? p.images : (p.image ? [p.image] : []);
+      document.querySelectorAll('.pm-img').forEach((input, index) => {
+        input.value = existingImages[index] || '';
+      });
       
       const vCont = document.getElementById('pm-variants');
       vCont.innerHTML = '';
@@ -792,13 +825,21 @@ const title = "Vaishali Admin | Dashboard";
 
       if (!variants.length) return toast('Add at least one weight variant', 'error');
 
+      const images = [...document.querySelectorAll('.pm-img')]
+        .map(input => input.value.trim())
+        .filter(Boolean)
+        .slice(0, 5);
+
+      if (!images.length) return toast('Add at least one product photo', 'error');
+
       const payload = {
         id: editingProductId || slug(name),
         name,
         note: document.getElementById('pm-note').value.trim(),
         category: document.getElementById('pm-category').value,
         featured: document.getElementById('pm-featured').value === 'true',
-        image: document.getElementById('pm-img').value.trim(),
+        image: images[0],
+        images,
         variants
       };
 
@@ -896,7 +937,10 @@ const title = "Vaishali Admin | Dashboard";
         contactEmail: document.getElementById('set-email').value.trim(),
         whatsappNumber: document.getElementById('set-whatsapp').value.replace(/\D/g, ''),
         phoneDisplay: document.getElementById('set-phone').value.trim(),
-        instagramHandle: document.getElementById('set-instagram').value.trim().replace(/^@/, '')
+        instagramHandle: document.getElementById('set-instagram').value.trim().replace(/^@/, ''),
+        founderName: document.getElementById('set-founder-name').value.trim(),
+        founderPhoto: document.getElementById('set-founder-photo').value.trim(),
+        founderBio: document.getElementById('set-founder-bio').value.trim()
       };
 
       try {

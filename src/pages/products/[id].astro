@@ -12,21 +12,60 @@ if (!product) {
 }
 
 const firstVariant = product.variants[0];
+const galleryImages = (
+  Array.isArray(product.images) && product.images.length
+    ? product.images
+    : [product.image]
+).filter(Boolean).slice(0, 5);
 ---
 
 <BaseLayout title={`${product.name} | Vaishali Foods`}>
   <section class="product-detail">
     <div class="container product-detail-grid">
       <div class="product-detail-image">
-        <img
-          src={product.image}
-          alt={product.name}
-          width="800"
-          height="1200"
-          fetchpriority="high"
-          loading="eager"
-          decoding="async"
-        />
+        {galleryImages.length > 0 ? (
+          <div class="gallery" data-gallery>
+            <div class="gallery-main">
+              <img
+                src={galleryImages[0]}
+                alt={product.name}
+                width="800"
+                height="800"
+                fetchpriority="high"
+                loading="eager"
+                decoding="async"
+                data-gallery-main
+              />
+              {galleryImages.length > 1 && (
+                <>
+                  <button type="button" class="gallery-arrow prev" data-gallery-prev aria-label="Previous photo">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+                  </button>
+                  <button type="button" class="gallery-arrow next" data-gallery-next aria-label="Next photo">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                  </button>
+                  <span class="gallery-count" data-gallery-count>1 / {galleryImages.length}</span>
+                </>
+              )}
+            </div>
+            {galleryImages.length > 1 && (
+              <div class="gallery-thumbs" role="tablist" aria-label="Product photos">
+                {galleryImages.map((src, index) => (
+                  <button
+                    type="button"
+                    class:list={['gallery-thumb', { active: index === 0 }]}
+                    data-gallery-thumb={index}
+                    aria-label={`View photo ${index + 1}`}
+                  >
+                    <img src={src} alt="" loading="lazy" decoding="async" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div class="placeholder" aria-label="Product photo coming soon"></div>
+        )}
       </div>
 
       <div class="product-detail-content">
@@ -282,6 +321,96 @@ const firstVariant = product.variants[0];
     color: inherit;
   }
 
+  .gallery {
+    display: grid;
+    gap: 12px;
+  }
+
+  .gallery-main {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #f5dfbd;
+    box-shadow: 0 20px 40px rgba(74, 41, 31, 0.08);
+  }
+
+  .gallery-main img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    max-height: 70vh;
+    border-radius: 0;
+    object-fit: cover;
+    box-shadow: none;
+    display: block;
+  }
+
+  .gallery-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(255, 253, 248, 0.94);
+    color: var(--brown);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(74, 41, 31, 0.2);
+  }
+
+  .gallery-arrow.prev { left: 12px; }
+  .gallery-arrow.next { right: 12px; }
+
+  .gallery-count {
+    position: absolute;
+    right: 12px;
+    bottom: 12px;
+    background: rgba(35, 19, 15, 0.72);
+    color: #fffdf8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 5px 11px;
+    border-radius: 999px;
+  }
+
+  .gallery-thumbs {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
+  }
+
+  .gallery-thumb {
+    border: 2px solid transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #f5dfbd;
+    padding: 0;
+    cursor: pointer;
+    aspect-ratio: 1 / 1;
+  }
+
+  .gallery-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .gallery-thumb.active {
+    border-color: var(--red);
+  }
+
+  @media (max-width: 768px) {
+    .gallery-thumbs {
+      grid-template-columns: repeat(5, 72px);
+      overflow-x: auto;
+      padding-bottom: 4px;
+    }
+  }
+
   @media (max-width: 768px) {
     .product-detail-grid {
       grid-template-columns: 1fr;
@@ -308,6 +437,30 @@ const firstVariant = product.variants[0];
 </style>
 
 <script is:inline>
+  document.querySelectorAll('[data-gallery]').forEach((gallery) => {
+    const main = gallery.querySelector('[data-gallery-main]');
+    const thumbs = Array.from(gallery.querySelectorAll('[data-gallery-thumb]'));
+    const count = gallery.querySelector('[data-gallery-count]');
+    if (!main || thumbs.length < 2) return;
+
+    const sources = thumbs.map((thumb) => thumb.querySelector('img').src);
+    let index = 0;
+
+    function show(next) {
+      index = (next + sources.length) % sources.length;
+      main.src = sources[index];
+      thumbs.forEach((thumb, i) => thumb.classList.toggle('active', i === index));
+      if (count) count.textContent = `${index + 1} / ${sources.length}`;
+    }
+
+    thumbs.forEach((thumb) => {
+      thumb.addEventListener('click', () => show(Number(thumb.dataset.galleryThumb)));
+    });
+
+    gallery.querySelector('[data-gallery-prev]')?.addEventListener('click', () => show(index - 1));
+    gallery.querySelector('[data-gallery-next]')?.addEventListener('click', () => show(index + 1));
+  });
+
   document.querySelectorAll('.variant-picker-detail').forEach((picker) => {
     const options = picker.querySelectorAll('.variant-option-detail');
     const priceDisplay = document.querySelector('.selected-price');

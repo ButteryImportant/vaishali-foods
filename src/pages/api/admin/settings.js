@@ -9,6 +9,9 @@ const DEFAULT_SETTINGS = {
   whatsappNumber: '919730487916',
   phoneDisplay: '+91 9730487916',
   instagramHandle: 'vaishali.foods',
+  founderName: 'Vaishali Biradar',
+  founderPhoto: '',
+  founderBio: 'Vaishali Biradar is a master at cooking, preparing laddoos, traditional foods and sweets since 2015. Every recipe at Vaishali Foods is hers, perfected over a decade in her own kitchen and made fresh for every order.',
 };
 
 function sanitizeSettings(input = {}) {
@@ -25,6 +28,9 @@ function sanitizeSettings(input = {}) {
     whatsappNumber: digits || DEFAULT_SETTINGS.whatsappNumber,
     phoneDisplay: str(input.phoneDisplay, 30) || DEFAULT_SETTINGS.phoneDisplay,
     instagramHandle: handle || DEFAULT_SETTINGS.instagramHandle,
+    founderName: str(input.founderName, 80) || DEFAULT_SETTINGS.founderName,
+    founderPhoto: str(input.founderPhoto, 2000),
+    founderBio: str(input.founderBio, 1000) || DEFAULT_SETTINGS.founderBio,
   };
 }
 
