@@ -21,6 +21,7 @@ const {
 const currentYear = new Date().getFullYear();
 const settings = await getSettings(Astro);
 const footerWhatsapp = `https://wa.me/${settings.whatsappNumber}`;
+const footerInstagram = `https://instagram.com/${settings.instagramHandle}`;
 ---
 
 <!doctype html>
@@ -113,6 +114,14 @@ const footerWhatsapp = `https://wa.me/${settings.whatsappNumber}`;
             rel="noreferrer"
           >
             Chat on WhatsApp
+          </a>
+
+          <a
+            href={footerInstagram}
+            target="_blank"
+            rel="noreferrer"
+          >
+            @{settings.instagramHandle}
           </a>
         </div>
       </div>

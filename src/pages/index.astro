@@ -98,8 +98,8 @@ const featuredProducts = products.filter((product) => product.featured);
       </div>
 
       <div>
-        <span class="eyebrow" style="color: #ffb283;">
-          Our promise
+        <span class="eyebrow" style="color: #e8b48f;">
+          02 - Our craft
         </span>
 
         <h2>Homemade care in every box.</h2>
@@ -121,65 +121,83 @@ const featuredProducts = products.filter((product) => product.featured);
           <a class="btn btn-primary" href="/about">
             Read our story
           </a>
+
+          <a class="btn btn-secondary story-btn-light" href="/founders">
+            Meet our founder
+          </a>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="section" id="contact">
+  <section class="section steps-section">
     <div class="container">
-      <div class="cta">
+      <div class="section-head">
         <div>
-          <span class="eyebrow" style="color: #ffd1c4;">
-            Questions or bulk order?
-          </span>
+          <span class="eyebrow">03 - How it works</span>
+          <h2>From our kitchen to your door</h2>
+        </div>
 
+        <p>
+          No pre-packed stock, no middlemen. Just a short path between
+          Vaishali's kitchen and your home.
+        </p>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card">
+          <span class="step-number">01</span>
+          <h3>You order</h3>
+          <p>Pick your laddoos and check out securely with Razorpay.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">02</span>
+          <h3>We cook fresh</h3>
+          <p>Your box is prepared only after you order. Nothing pre-packed.</p>
+        </article>
+
+        <article class="step-card">
+          <span class="step-number">03</span>
+          <h3>Delhivery delivers</h3>
+          <p>Tracked shipping to your PIN code, calculated at checkout.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section talk-section" id="contact">
+    <div class="container">
+      <div class="talk-card">
+        <div>
+          <span class="eyebrow">Questions or bulk orders?</span>
           <h2>Talk to Vaishali Foods.</h2>
-
           <p>
-            We&#8217;ll help with product selection, delivery questions and custom
-            gifting orders.
+            Product selection, delivery questions and custom orders -
+            answered personally on WhatsApp.
           </p>
         </div>
 
-        <div class="hero-actions">
+        <div class="talk-actions">
           <a
-            class="btn"
-            style="background: white; color: var(--red);"
-            href="/contact"
-          >
-            Contact us
-          </a>
-
-          <a
-            class="btn"
-            style="background: transparent; color: white; border: 1px solid rgba(255,255,255,0.35);"
+            class="btn btn-primary"
             href={`https://wa.me/${settings.whatsappNumber}`}
             target="_blank"
             rel="noreferrer"
           >
-            Open WhatsApp
+            Chat on WhatsApp
+          </a>
+
+          <a
+            class="talk-instagram"
+            href={`https://instagram.com/${settings.instagramHandle}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            @{settings.instagramHandle} on Instagram
           </a>
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="section follow-section">
-    <div class="container follow-container">
-      <div>
-        <h2>Follow us on Instagram</h2>
-        <p>Daily updates, behind-the-scenes content, and new product launches.</p>
-      </div>
-
-      <a
-        href={`https://instagram.com/${settings.instagramHandle}`}
-        target="_blank"
-        rel="noreferrer"
-        class="btn btn-primary"
-      >
-        Follow @{settings.instagramHandle}
-      </a>
     </div>
   </section>
 </BaseLayout>
